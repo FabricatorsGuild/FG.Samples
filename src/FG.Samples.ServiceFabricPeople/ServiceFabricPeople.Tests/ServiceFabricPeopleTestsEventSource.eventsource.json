@@ -1,0 +1,53 @@
+{
+  "Loggers": [
+    {
+      "Name": "ICommunicationLogger",
+      "StartId": 1000,
+      "ImplicitArguments": [
+        {
+          "Name": "testrun",
+          "Type": "string"
+        }
+      ],
+      "OverrideArguments": []
+    }
+  ],
+  "Name": "ServiceFabricPeopleTestsEventSource",
+  "ProviderName": "ServiceFabricPeople-Tests",
+  "Keywords": [
+    "Communication"
+  ],
+  "TypeTemplates": [
+    {
+      "Name": "Exception",
+      "CLRType": "System.Exception",
+      "Arguments": [
+        {
+          "Name": "message",
+          "Type": "string",
+          "Assignment": "$this.Message"
+        },
+        {
+          "Name": "source",
+          "Type": "string",
+          "Assignment": "$this.Source"
+        },
+        {
+          "Name": "exceptionTypeName",
+          "Type": "string",
+          "Assignment": "$this.GetType().FullName"
+        },
+        {
+          "Name": "exception",
+          "Type": "string",
+          "Assignment": "$this.AsJson()"
+        }
+      ]
+    }
+  ],
+  "Settings": {
+    "Modules": [
+    ],
+    "AutogenerateLoggerInterfaces": true
+  }
+}

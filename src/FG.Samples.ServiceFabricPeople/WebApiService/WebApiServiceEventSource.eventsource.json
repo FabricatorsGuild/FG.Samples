@@ -1,0 +1,47 @@
+{
+  "Loggers": [
+    {
+      "Name": "IWebApiLogger",
+      "StartId": 100,
+      "ImplicitArguments": [
+        {
+          "Name": "context",
+          "Type": "StatelessServiceContext"
+        }
+      ]
+    },
+    {
+      "Name": "ICommunicationLogger",
+      "StartId": 200,
+      "ImplicitArguments": [
+        {
+          "Name": "context",
+          "Type": "StatelessServiceContext"
+        }
+      ]
+    },
+    {
+      "Name": "IOwinCommunicationLogger",
+      "StartId": 300,
+      "ImplicitArguments": [
+        {
+          "Name": "context",
+          "Type": "StatelessServiceContext"
+        }
+      ]
+    },
+    {
+      "Name": "IServiceHostLogger",
+      "StartId": 400
+    }
+  ],
+  "Name": "WebApiServiceEventSource",
+  "ProviderName": "CodeEffect-ServiceFabric-Auditing-WebApi",
+  "Keywords": [],
+  "TypeTemplates": [
+  ],
+  "Settings": {
+    "AutogenerateLoggerInterfaces": false,
+    "Modules": [ "ServiceFabric", "AI" ]
+  }
+}
