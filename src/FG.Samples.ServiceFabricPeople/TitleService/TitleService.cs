@@ -11,8 +11,8 @@ using TitleService.Diagnostics;
 
 namespace TitleService
 {
-    internal sealed class TitleService : FG.ServiceFabric.Services.Runtime.StatefulService, ITitleService
-    {
+	internal sealed class TitleService : FG.ServiceFabric.Services.Runtime.StatefulService, ITitleService, IStatefulServiceMaintenance
+	{
         private readonly ICommunicationLogger _communicationLogger;
 
 		private readonly IDictionary<string, PersonStatistics> _personStatistics = new ConcurrentDictionary<string, PersonStatistics>();
@@ -70,7 +70,12 @@ namespace TitleService
 			}
 			return Task.FromResult(true);
 		}
-    }
+
+		public Task<string[]> GetStatesAsync()
+		{
+			return Task.FromResult(new string[]{""});
+		}
+	}
 
 	public class PersonStatistics
 	{

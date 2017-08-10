@@ -24,7 +24,7 @@ namespace WebApiService
 			Container = new TinyIoCContainer();
 			Container.Register<StatelessServiceContext>(context);
 			Container.Register<WebApiService>(this);
-			//Container.Register<IOwinCommunicationLogger>(new Owin(context))
+			Container.Register<IOwinCommunicationLogger>(new OwinCommunicationLogger(context));
 		}
 
 		/// <summary>
@@ -35,7 +35,12 @@ namespace WebApiService
 		{
 			return new ServiceInstanceListener[]
 			{
-				new ServiceInstanceListener(serviceContext => new OwinCommunicationListener(appBuilder => Startup.ConfigureApp(appBuilder, Container), serviceContext, null, "ServiceEndpoint"))
+				new ServiceInstanceListener(
+					serviceContext => new OwinCommunicationListener(
+						appBuilder => Startup.ConfigureApp(appBuilder, Container),
+						serviceContext,
+						Container.Resolve<IOwinCommunicationLogger>(),
+						"ServiceEndpoint"))
 			};
 		}
 	}

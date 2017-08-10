@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Threading;
@@ -15,10 +16,11 @@ using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using PersonActor.Diagnostics;
 using PersonActor.Interfaces;
 using TitleService;
+using FG.ServiceFabric.Actors.Runtime;
 
 namespace PersonActor
 {
-	public class PersonActorService : ActorService, IPersonActorService
+	public class PersonActorService : ActorService, IPersonActorService, IActorServiceMaintenance
 	{
 		private readonly Func<IServiceDomainLogger> _serviceLoggerFactory;
 		private readonly Func<ICommunicationLogger> _communicationLoggerFactory;
@@ -29,6 +31,8 @@ namespace PersonActor
 		{
 			_serviceLoggerFactory = () => new ServiceDomainLogger(this, ServiceRequestContext.Current);
 			_communicationLoggerFactory = () => new CommunicationLogger(this);
+
+			_actorStates.Add("state", typeof(Person));
 		}
 
 		protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
@@ -132,6 +136,53 @@ namespace PersonActor
 			} while (continuationToken != null);
 
 			return result;
+		}
+
+
+
+
+		private readonly IDictionary<string, Type> _actorStates = new ConcurrentDictionary<string, Type>();
+
+		public async Task<State[]> GetStates(ActorId actorId, CancellationToken cancellationToken)
+		{
+			var states = new List<State>();
+			var stateNamesEnumerator = await this.StateProvider.EnumerateStateNamesAsync(actorId, cancellationToken);
+
+			foreach (var stateName in stateNamesEnumerator)
+			{
+				var actorStateType = _actorStates[stateName];
+				var actorState = (Task) await this.StateProvider.LoadStateAsync(actorStateType, actorId, stateName, cancellationToken);
+				var actorStateResult = actorState.GetTaskResult(actorStateType);
+				var stateData = Newtonsoft.Json.JsonConvert.SerializeObject(actorStateResult);
+
+				var state = new State() {Data = stateData, Name = stateName, TypeName = actorStateType.FullName};
+				states.Add(state);
+			}
+			return states.ToArray();
+
+		}
+
+		public async Task<ActorId[]> GetActors(CancellationToken cancellationToken)
+		{
+			ContinuationToken continuationToken = null;
+			//var actors = await this.StateProvider.GetActorsAsync(100, continuationToken, cancellationToken);
+
+			var results = 0;
+			var maxResults = 50000;
+			var result = new List<ActorId>();
+			do
+			{
+				var page = await this.StateProvider.GetActorsAsync(100, continuationToken, cancellationToken);
+				foreach (var actor in page.Items)
+				{
+					result.Add(actor);
+					results++;
+				}
+				if (results >= maxResults) return result.ToArray();
+				continuationToken = page.ContinuationToken;
+			} while (continuationToken != null);
+
+			return result.ToArray();
 		}
 	}
 }

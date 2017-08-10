@@ -150,6 +150,10 @@
       <Project>{2f2b5701-77b5-4467-9504-8be73a3725a7}</Project>
       <Name>FG.ServiceFabric.Testing</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Application\Application.csproj">
+      <Project>{E3324371-73A6-4578-A9D9-7221E7838C89}</Project>
+      <Name>Application</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PersonActor.Interfaces\PersonActor.Interfaces.csproj">
       <Project>{f1eb614a-4667-4dfd-8d39-6a650e8c8a4c}</Project>
       <Name>PersonActor.Interfaces</Name>

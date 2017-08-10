@@ -148,6 +148,7 @@
       <DependentUpon>WebApiServiceEventSource.eventsource.json</DependentUpon>
     </Compile>
     <Compile Include="Controllers\ILoggableController.cs" />
+    <Compile Include="Controllers\MaintenanceController.cs" />
     <Compile Include="Controllers\PersonController.cs" />
     <Compile Include="Controllers\TitleController.cs" />
     <Compile Include="Diagnostics\ICommunicationLogger.cs" />
@@ -208,7 +209,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="PackageRoot\Config\Settings.xml" />
-    <None Include="PackageRoot\ServiceManifest.xml" />
+    <None Include="PackageRoot\ServiceManifest.xml">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="WebApiServiceEventSource.eventsource.json" />

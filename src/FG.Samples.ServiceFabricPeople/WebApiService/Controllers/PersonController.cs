@@ -29,10 +29,10 @@ namespace WebApiService.Controllers
         {
             _contextScope = new ServiceRequestContextWrapperServiceFabricPeople(correlationId: Guid.NewGuid().ToString(), userId: "mainframe64/Kapten_rödskägg");
 
-            //_logger = new WebApiLogger(context);
-            //_servicesCommunicationLogger = new CommunicationLogger(context);
+			_logger = new WebApiLogger(context);
+			_servicesCommunicationLogger = new CommunicationLogger(context);
 
-            _logger.ActivatingController(_contextScope.CorrelationId, _contextScope.UserId);            
+			_logger.ActivatingController(_contextScope.CorrelationId, _contextScope.UserId);            
 		}
 
         private PartitionHelper GetOrCreatePartitionHelper()
