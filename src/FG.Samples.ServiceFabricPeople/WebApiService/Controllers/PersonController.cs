@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Application;
 using FG.ServiceFabric.Services.Remoting.Runtime.Client;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Actors;
 using Microsoft.ServiceFabric.Actors.Client;
 using PersonActor.Interfaces;
@@ -13,8 +13,8 @@ using WebApiService.Diagnostics;
 
 namespace WebApiService.Controllers
 {
-	[ServiceRequestActionFilter]
-	public class PersonController : ApiController, ILoggableController
+	[Route("api/[controller]")]
+	public class PersonController : ControllerBase, ILoggableController
     {
         private readonly object _lock = new object();
 
@@ -65,7 +65,8 @@ namespace WebApiService.Controllers
 
         }
 
-	    // GET api/person 
+		[HttpGet]
+		// GET api/person 
 		public async Task<IDictionary<string, IDictionary<string, Person>>> Get()
 		{
             var serviceUri = new Uri($"{FabricRuntime.GetActivationContext().ApplicationName}/PersonActorService");
@@ -86,6 +87,7 @@ namespace WebApiService.Controllers
             return allPersons;
 		}
 
+		[HttpGet("{id}")]
 		// GET api/person/ardinheli 
 		public async Task<Person> Get(string id)
 		{

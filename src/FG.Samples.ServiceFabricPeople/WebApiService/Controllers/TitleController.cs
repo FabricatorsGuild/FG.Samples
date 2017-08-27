@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Application;
 using FG.ServiceFabric.Services.Remoting.Runtime.Client;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Services.Client;
 using TitleService;
 using WebApiService.Diagnostics;
 
 namespace WebApiService.Controllers
 {
-	[ServiceRequestActionFilter]
-	public class TitleController : ApiController, ILoggableController
+	[Route("api/[controller]")]
+	public class TitleController : ControllerBase, ILoggableController
 	{
 		private readonly object _lock = new object();
 
@@ -62,6 +62,7 @@ namespace WebApiService.Controllers
 		}
 
 
+		[HttpGet]
 		// GET api/values 
 		public async Task<IDictionary<string, IList<string>>> Get()
 		{

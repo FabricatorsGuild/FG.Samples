@@ -1,50 +1,43 @@
-﻿using System.Collections.Generic;
-using System.Net.Http.Formatting;
-using System.Web.Http;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
-using Owin;
-using TinyIoC;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace WebApiService
 {
-	public static class Startup
-	{
-		// This code configures Web API. The Startup class is specified as a type
-		// parameter in the WebApp.Start method.
-		public static void ConfigureApp(IAppBuilder appBuilder, TinyIoCContainer container)
-		{
-			// Configure Web API for self-host. 
-			HttpConfiguration config = new HttpConfiguration();
+    public class Startup
+    {
+        public Startup(IHostingEnvironment env)
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
+        }
 
-			var defaultSettings = new JsonSerializerSettings
-			{
-				Formatting = Formatting.Indented,
-				ContractResolver = new CamelCasePropertyNamesContractResolver(),
-				Converters = new List<JsonConverter>
-						{
-							new StringEnumConverter{ CamelCaseText = true },
-						}
-			};
+        public IConfigurationRoot Configuration { get; }
 
-			JsonConvert.DefaultSettings = () => defaultSettings;
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            // Add framework services.
+            services.AddMvc();	
+        }
 
-			config.Formatters.Clear();
-			config.Formatters.Add(new JsonMediaTypeFormatter());
-			config.Formatters.JsonFormatter.SerializerSettings = defaultSettings;
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        {
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            loggerFactory.AddDebug();
 
-			config.Routes.MapHttpRoute(
-				name: "DefaultApi",
-				routeTemplate: "api/{controller}/{id}",
-				defaults: new { id = RouteParameter.Optional }
-			);
-			config.MapHttpAttributeRoutes();
-
-
-			config.DependencyResolver = new TinyIoCResolver(container);
-
-			appBuilder.UseWebApi(config);
-		}
-	}
+            app.UseMvc();
+        }
+    }
 }

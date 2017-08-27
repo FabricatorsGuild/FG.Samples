@@ -4,19 +4,17 @@ using System.Fabric;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Application;
 using FG.ServiceFabric.Services.Remoting.Runtime.Client;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.ServiceFabric.Actors;
-using Microsoft.ServiceFabric.Services.Client;
 using PersonActor.Interfaces;
-using TitleService;
 using WebApiService.Diagnostics;
 
 namespace WebApiService.Controllers
 {
-	[ServiceRequestActionFilter]
-	public class MaintenanceController : ApiController, ILoggableController
+	public class MaintenanceController : ControllerBase, ILoggableController
 	{
 		private readonly object _lock = new object();
 
