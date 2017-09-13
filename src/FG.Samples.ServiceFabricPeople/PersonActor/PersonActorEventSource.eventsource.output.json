@@ -12,41 +12,55 @@
     "..\\packages\\Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel.2.4.0\\lib\\net45\\Microsoft.AI.ServerTelemetryChannel.dll",
     "..\\packages\\Microsoft.ApplicationInsights.WindowsServer.2.4.0\\lib\\net45\\Microsoft.AI.WindowsServer.dll",
     "..\\packages\\Microsoft.ApplicationInsights.2.4.0\\lib\\net45\\Microsoft.ApplicationInsights.dll",
-    "..\\packages\\Microsoft.ServiceFabric.Actors.2.6.210\\lib\\net45\\Microsoft.ServiceFabric.Actors.dll",
-    "..\\packages\\Microsoft.ServiceFabric.Data.2.6.210\\lib\\net45\\Microsoft.ServiceFabric.Data.dll",
-    "..\\packages\\Microsoft.ServiceFabric.Data.2.6.210\\lib\\net45\\Microsoft.ServiceFabric.Data.Interfaces.dll",
-    "..\\packages\\Microsoft.ServiceFabric.FabricTransport.Internal.2.6.210\\lib\\net45\\Microsoft.ServiceFabric.FabricTransport.dll",
-    "..\\packages\\Microsoft.ServiceFabric.5.6.210\\lib\\net45\\Microsoft.ServiceFabric.Internal.dll",
-    "..\\packages\\Microsoft.ServiceFabric.5.6.210\\lib\\net45\\Microsoft.ServiceFabric.Internal.Strings.dll",
-    "..\\packages\\Microsoft.ServiceFabric.Services.2.6.210\\lib\\net45\\Microsoft.ServiceFabric.Services.dll",
-    "..\\packages\\Microsoft.ServiceFabric.Services.Remoting.2.6.210\\lib\\net45\\Microsoft.ServiceFabric.Services.Remoting.dll",
+    "..\\packages\\Microsoft.ServiceFabric.Actors.2.7.198\\lib\\net45\\Microsoft.ServiceFabric.Actors.dll",
+    "..\\packages\\Microsoft.ServiceFabric.Data.2.7.198\\lib\\net45\\Microsoft.ServiceFabric.Data.dll",
+    "..\\packages\\Microsoft.ServiceFabric.Data.2.7.198\\lib\\net45\\Microsoft.ServiceFabric.Data.Interfaces.dll",
+    "..\\packages\\Microsoft.ServiceFabric.Diagnostics.Internal.2.7.198\\lib\\net45\\Microsoft.ServiceFabric.Diagnostics.dll",
+    "..\\packages\\Microsoft.ServiceFabric.FabricTransport.Internal.2.7.198\\lib\\net45\\Microsoft.ServiceFabric.FabricTransport.dll",
+    "..\\packages\\Microsoft.ServiceFabric.5.7.198\\lib\\net45\\Microsoft.ServiceFabric.Internal.dll",
+    "..\\packages\\Microsoft.ServiceFabric.5.7.198\\lib\\net45\\Microsoft.ServiceFabric.Internal.Strings.dll",
+    "..\\packages\\Microsoft.ServiceFabric.5.7.198\\lib\\net45\\Microsoft.ServiceFabric.Preview.dll",
+    "..\\packages\\Microsoft.ServiceFabric.Services.2.7.198\\lib\\net45\\Microsoft.ServiceFabric.Services.dll",
+    "..\\packages\\Microsoft.ServiceFabric.Services.Remoting.2.7.198\\lib\\net45\\Microsoft.ServiceFabric.Services.Remoting.dll",
     "..\\packages\\Newtonsoft.Json.10.0.3\\lib\\net45\\Newtonsoft.Json.dll",
     "System.dll",
     "System.Core.dll",
     "..\\packages\\System.Diagnostics.DiagnosticSource.4.4.0\\lib\\net45\\System.Diagnostics.DiagnosticSource.dll",
-    "..\\packages\\Microsoft.ServiceFabric.5.6.210\\lib\\net45\\System.Fabric.dll",
-    "..\\packages\\Microsoft.ServiceFabric.5.6.210\\lib\\net45\\System.Fabric.Management.ServiceModel.dll",
-    "..\\packages\\Microsoft.ServiceFabric.5.6.210\\lib\\net45\\System.Fabric.Management.ServiceModel.XmlSerializers.dll",
-    "..\\packages\\Microsoft.ServiceFabric.5.6.210\\lib\\net45\\System.Fabric.Strings.dll",
+    "..\\packages\\Microsoft.ServiceFabric.5.7.198\\lib\\net45\\System.Fabric.dll",
+    "..\\packages\\Microsoft.ServiceFabric.5.7.198\\lib\\net45\\System.Fabric.Management.ServiceModel.dll",
+    "..\\packages\\Microsoft.ServiceFabric.5.7.198\\lib\\net45\\System.Fabric.Management.ServiceModel.XmlSerializers.dll",
+    "..\\packages\\Microsoft.ServiceFabric.5.7.198\\lib\\net45\\System.Fabric.Strings.dll",
     "System.Runtime.Serialization.dll",
     "System.ServiceModel.dll"
   ],
   "ProjectReferences": [
     {
       "ReferenceName": "..\\..\\..\\..\\erviceFabric\\src\\FG.ServiceFabric.Actors.Remoting\\bin\\Debug\\FG.ServiceFabric.Actors.Remoting.dll",
-      "Hash": "20:32:13"
+      "Hash": "08:02:21"
     },
     {
       "ReferenceName": "..\\..\\..\\..\\erviceFabric\\src\\FG.ServiceFabric.Diagnostics\\bin\\Debug\\FG.ServiceFabric.Diagnostics.dll",
-      "Hash": "20:30:16"
+      "Hash": "08:02:19"
+    },
+    {
+      "ReferenceName": "..\\..\\..\\..\\erviceFabric\\src\\FG.ServiceFabric.Extensions\\bin\\Debug\\FG.ServiceFabric.Extensions.dll",
+      "Hash": "12:34:44"
+    },
+    {
+      "ReferenceName": "..\\..\\..\\..\\erviceFabric\\src\\FG.ServiceFabric.Persistence\\bin\\Debug\\FG.ServiceFabric.Persistence.dll",
+      "Hash": "14:00:16"
     },
     {
       "ReferenceName": "..\\..\\..\\..\\erviceFabric\\src\\FG.ServiceFabric.Services.Remoting\\bin\\Debug\\FG.ServiceFabric.Services.Remoting.dll",
-      "Hash": "20:30:15"
+      "Hash": "08:02:18"
+    },
+    {
+      "ReferenceName": "..\\Application\\bin\\Debug\\Application.dll",
+      "Hash": "08:02:20"
     },
     {
       "ReferenceName": "..\\PersonActor.Interfaces\\bin\\x64\\Debug\\PersonActor.Interfaces.dll",
-      "Hash": "20:27:15"
+      "Hash": "16:58:31"
     }
   ],
   "CompileTargets": [
@@ -67,5 +81,5 @@
       "Hash": "c98befbfbd3acda253efbfbd622a19efbfbd1befbfbd36efbfbd"
     }
   ],
-  "Hash": "2fefbfbd4422efbfbdefbfbd64efbfbdefbfbdefbfbd1b463f4e0e65"
+  "Hash": "0b7b7befbfbd41efbfbd6e21efbfbd74efbfbd2031efbfbd2f38"
 }

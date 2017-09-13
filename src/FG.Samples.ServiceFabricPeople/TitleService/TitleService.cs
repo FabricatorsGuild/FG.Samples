@@ -1,26 +1,36 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Fabric;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FG.ServiceFabric.Actors.Runtime;
 using FG.ServiceFabric.Services.Remoting.Runtime;
+using FG.ServiceFabric.Services.Runtime.State;
+using FG.ServiceFabric.Services.Runtime.StateSession;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
-using Microsoft.ServiceFabric.Services.Runtime;
 using TitleService.Diagnostics;
 
 namespace TitleService
 {
+
 	internal sealed class TitleService : FG.ServiceFabric.Services.Runtime.StatefulService, ITitleService, IStatefulServiceMaintenance
 	{
         private readonly ICommunicationLogger _communicationLogger;
 
+		private readonly IStatefulServiceStateManager _stateManager;
+
 		private readonly IDictionary<string, PersonStatistics> _personStatistics = new ConcurrentDictionary<string, PersonStatistics>();
 
-        public TitleService(StatefulServiceContext context)
+		private readonly IStateSessionManager _stateSessionManager;
+
+        public TitleService(StatefulServiceContext context, IStateSessionManager stateSessionManager)
             : base(context)
         {
-            _communicationLogger = new CommunicationLogger(this.Context);
+	        _stateSessionManager = stateSessionManager;
+	        _communicationLogger = new CommunicationLogger(this.Context);
+			//_stateManager = new DocumentStorageStatefulServiceStateManager(context, new ReliableStateStatefulServiceStateManager(this.StateManager), storageSessionFactory);
+
         }
 
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
@@ -31,47 +41,71 @@ namespace TitleService
             };
         }
         
-        public Task<string[]> GetTitlesAsync(CancellationToken cancellationToken)
+        Task<string[]> ITitleService.GetTitlesAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(ObjectMother.Titles);
-        }		
-
-        public Task<string[]> GetPersonsWithTitleAsync(string title, CancellationToken cancellationToken)
-        {
-			var personStatistic = _personStatistics.ContainsKey(title) ? _personStatistics[title] : new PersonStatistics() { Title = title, Persons = new string[0] };
-	        return Task.FromResult(personStatistic.Persons);
         }
 
-	    public Task SetTitleAsync(string person, string title, CancellationToken cancellationToken)
-	    {
-			var personStatistic = _personStatistics.ContainsKey(title) ? _personStatistics[title] : new PersonStatistics() { Title = title, Persons = new string[0] };
+		private string GetStorageKey(string title)
+		{
+			return $"state_title_{title}";
+		}
+		
 
-		    if (!personStatistic.Persons.Contains(person))
-		    {
-			    var persons = new List<string>(personStatistic.Persons) {person};
-			    personStatistic.Persons = persons.ToArray();
+		async Task<string[]> ITitleService.GetPersonsWithTitleAsync(string title, CancellationToken cancellationToken)
+        {
+			await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
 
-			    _personStatistics[title] = personStatistic;
-		    }
-		    return Task.FromResult(true);
+			PersonStatistics personStatistic = null;
+			using (var session = _stateSessionManager.CreateSession())
+			{
+				var storageKey = GetStorageKey(title);
+				var personStatisticValue = await session.TryGetValueAsync<PersonStatistics>(@"titles", storageKey, cancellationToken);
+				personStatistic = personStatisticValue.HasValue ? personStatisticValue.Value :
+				   new PersonStatistics() { Title = title, Persons = new string[0] };
+			}
+			return personStatistic?.Persons ?? new string[0];
 		}
 
-	    public Task RemoveTitleAsync(string person, string title, CancellationToken cancellationToken)
+		async Task ITitleService.SetTitleAsync(string person, string title, CancellationToken cancellationToken)
 	    {
-			var personStatistic = _personStatistics.ContainsKey(title) ? _personStatistics[title] : new PersonStatistics() { Title = title, Persons = new string[0] };
+			await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
 
-			if (personStatistic.Persons.Contains(person))
+			using (var session = _stateSessionManager.CreateSession())
 			{
-				var persons = new List<string>(personStatistic.Persons);
+				var storageKey = GetStorageKey(title);
+
+				var personStatisticValue = await session.TryGetValueAsync<PersonStatistics>(@"titles", storageKey, cancellationToken);
+				var personStatistic = personStatisticValue.HasValue ? personStatisticValue.Value :
+					new PersonStatistics() { Title = title, Persons = new string[0] };
+
+				var persons = new List<string>(personStatistic.Persons) {person};
+				personStatistic.Persons = persons.ToArray();
+
+				await session.SetValueAsync(@"titles", storageKey, personStatistic, null, cancellationToken);
+			}
+		}
+
+	    async Task ITitleService.RemoveTitleAsync(string person, string title, CancellationToken cancellationToken)
+	    {
+			await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
+
+			using (var session = _stateSessionManager.CreateSession())
+			{
+				var storageKey = GetStorageKey(title);
+				var personStatisticValue = await session.TryGetValueAsync<PersonStatistics>(@"titles", storageKey, cancellationToken);
+				 var personStatistic = personStatisticValue.HasValue ? personStatisticValue.Value : 
+					 new PersonStatistics() { Title = title, Persons = new string[0] };
+
+				var persons = new List<string>(personStatistic.Persons) { };
 				persons.Remove(person);
 				personStatistic.Persons = persons.ToArray();
 
-				_personStatistics[title] = personStatistic;
+				await session.SetValueAsync(@"titles", storageKey, personStatistic, null, cancellationToken);
 			}
-			return Task.FromResult(true);
 		}
 
-		public Task<string[]> GetStatesAsync()
+		Task<string[]> IStatefulServiceMaintenance.GetStatesAsync()
 		{
 			return Task.FromResult(new string[]{""});
 		}

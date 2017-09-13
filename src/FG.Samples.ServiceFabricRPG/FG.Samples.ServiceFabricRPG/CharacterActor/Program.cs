@@ -3,12 +3,9 @@ using System.Diagnostics;
 using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
-using FG.ServiceFabric.Actors.Runtime;
-using FG.ServiceFabric.Fabric;
-using FG.ServiceFabric.Services.Runtime.StateSession;
 using Microsoft.ServiceFabric.Actors.Runtime;
 
-namespace PersonActor
+namespace CharacterActor
 {
 	internal static class Program
 	{
@@ -24,14 +21,8 @@ namespace PersonActor
 				// are automatically populated when you build this project.
 				// For more information, see https://aka.ms/servicefabricactorsplatform
 
-				ActorRuntime.RegisterActorAsync<PersonActor>(
-					(context, actorType) => new PersonActorService(context, actorType, stateProvider:
-						new StateSessionActorStateProvider(context,
-								new FileSystemStateSessionManager(
-									context.ServiceName.AbsoluteUri,
-									context.PartitionId,
-									StateSessionHelper.GetPartitionInfo(context, () => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient())).GetAwaiter().GetResult(),
-									@"c:/temp/sf"), actorType))).GetAwaiter().GetResult();
+				ActorRuntime.RegisterActorAsync<CharacterActor>(
+				   (context, actorType) => new ActorService(context, actorType)).GetAwaiter().GetResult();
 
 				Thread.Sleep(Timeout.Infinite);
 			}

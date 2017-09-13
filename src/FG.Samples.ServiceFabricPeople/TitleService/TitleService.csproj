@@ -177,6 +177,10 @@
       <Project>{bcee1998-b962-48a3-b31e-e345dbed1348}</Project>
       <Name>FG.ServiceFabric.Extensions</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\FG.ServiceFabric\src\FG.ServiceFabric.Persistence\FG.ServiceFabric.Persistence.csproj">
+      <Project>{61CE425B-F4B5-4981-8CF9-9A5C901ADD2B}</Project>
+      <Name>FG.ServiceFabric.Persistence</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\FG.ServiceFabric\src\FG.ServiceFabric.Services.Remoting\FG.ServiceFabric.Services.Remoting.csproj">
       <Project>{1A4F9C49-629B-4331-BE3C-698FFFAA294C}</Project>
       <Name>FG.ServiceFabric.Services.Remoting</Name>

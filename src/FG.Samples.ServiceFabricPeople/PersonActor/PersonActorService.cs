@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Fabric;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application;
@@ -20,14 +21,15 @@ using FG.ServiceFabric.Actors.Runtime;
 
 namespace PersonActor
 {
-	public class PersonActorService : ActorService, IPersonActorService, IActorServiceMaintenance
+	public class PersonActorService : Microsoft.ServiceFabric.Actors.Runtime.ActorService, IPersonActorService, IActorServiceMaintenance
 	{
 		private readonly Func<IServiceDomainLogger> _serviceLoggerFactory;
 		private readonly Func<ICommunicationLogger> _communicationLoggerFactory;
 
-		public PersonActorService(StatefulServiceContext context, ActorTypeInformation actorTypeInfo, Func<ActorService, ActorId, ActorBase> actorFactory = null,
-			Func<ActorBase, IActorStateProvider, IActorStateManager> stateManagerFactory = null, IActorStateProvider stateProvider = null,
-			ActorServiceSettings settings = null) : base(context, actorTypeInfo, actorFactory, stateManagerFactory, stateProvider, settings)
+		public PersonActorService(StatefulServiceContext context, ActorTypeInformation actorTypeInfo, Func<Microsoft.ServiceFabric.Actors.Runtime.ActorService, ActorId, Microsoft.ServiceFabric.Actors.Runtime.ActorBase> actorFactory = null,
+			Func<Microsoft.ServiceFabric.Actors.Runtime.ActorBase, IActorStateProvider, IActorStateManager> stateManagerFactory = null, IActorStateProvider stateProvider = null,
+			ActorServiceSettings settings = null) : 
+			base(context, actorTypeInfo, actorFactory, stateManagerFactory, stateProvider, settings)
 		{
 			_serviceLoggerFactory = () => new ServiceDomainLogger(this, ServiceRequestContext.Current);
 			_communicationLoggerFactory = () => new CommunicationLogger(this);
@@ -73,17 +75,24 @@ namespace PersonActor
 			var serviceProxyFactory = new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(communicationLogger);
 			foreach (var partitionKey in partitionKeys)
 			{
-				var serviceProxy = serviceProxyFactory.CreateServiceProxy<ITitleService>(
-					new Uri($"{this.Context.CodePackageActivationContext.ApplicationName}/TitleService"),
-					new ServicePartitionKey(partitionKey.LowKey));
-				var titles = await serviceProxy.GetTitlesAsync(cancellationToken);
-				allTitlesList.AddRange(titles);
+				var correlationId = Guid.NewGuid().ToString();
+				using (new ServiceRequestContextWrapperServiceFabricPeople(correlationId, Environment.UserName))
+				{
+					var serviceProxy = serviceProxyFactory.CreateServiceProxy<ITitleService>(
+						new Uri($"{this.Context.CodePackageActivationContext.ApplicationName}/TitleService"),
+						new ServicePartitionKey(partitionKey.LowKey));
+					var titles = await serviceProxy.GetTitlesAsync(cancellationToken);
+					allTitlesList.AddRange(titles);
+				}
 			}
 			var allTitles = allTitlesList.ToArray();
 
 			while (true)
 			{
-				foreach (var name in ObjectMother.Names)
+				var random = new Random(Environment.TickCount);
+
+
+				foreach (var name in ObjectMother.Names.Select(n => new {Name = n, Ordinal = random.Next(1000)}).OrderBy(i => i.Ordinal).Select(i => i.Name))
 				{
 					var correlationId = Guid.NewGuid().ToString();
 					using (new ServiceRequestContextWrapperServiceFabricPeople(correlationId, Environment.UserName))

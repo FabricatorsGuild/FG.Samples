@@ -8,9 +8,14 @@ using System.Threading.Tasks;
 using Application;
 using FG.Common.Async;
 using FG.Common.Utils;
+using FG.ServiceFabric.Actors.Runtime;
 using FG.ServiceFabric.Services.Remoting.FabricTransport;
+using FG.ServiceFabric.Services.Runtime;
+using FG.ServiceFabric.Services.Runtime.State;
+using FG.ServiceFabric.Services.Runtime.StateSession;
 using FG.ServiceFabric.Testing.Mocks;
 using FG.ServiceFabric.Testing.Mocks.Actors.Runtime;
+using FG.ServiceFabric.Testing.Mocks.Data;
 using FG.ServiceFabric.Testing.Mocks.Fabric;
 using FG.ServiceFabric.Testing.Mocks.Services.Runtime;
 using FluentAssertions;
@@ -47,15 +52,30 @@ namespace ServiceFabricPeople.Tests
 			_fabricRuntime = new MockFabricRuntime("Overlord");
 
 			_context = new ServiceRequestContextWrapperServiceFabricPeople(Guid.NewGuid().ToString(), "testivus");
+			var reliableStateManager = new MockReliableStateManager(_fabricRuntime);
 
-			_fabricRuntime.SetupService((context, stateManager) => new TitleService.TitleService(context), 
-				serviceDefinition: MockServiceDefinition.CreateUniformInt64Partitions(10));			
-			
+			var state = new Dictionary<string, string>();
+
+			_fabricRuntime.SetupService((context, stateManager) => new TitleService.TitleService(context, 
+				stateSessionManager: new InMemoryStateSessionManager(
+					StateSessionHelper.GetServiceName(context.ServiceName),
+					context.PartitionId,
+					StateSessionHelper.GetPartitionInfo(context, () => _fabricRuntime.PartitionEnumerationManager).GetAwaiter().GetResult(),
+					state)), 
+				serviceDefinition: MockServiceDefinition.CreateUniformInt64Partitions(10));
+
 			_fabricRuntime.SetupActor<PersonActor.PersonActor, PersonActorService>(
 				(service, actorId) => new PersonActor.PersonActor(service, actorId),
 				(context, actorTypeInformation, stateProvider, stateManagerFactory) =>
-					new PersonActorService(context, actorTypeInformation, stateProvider: stateProvider), 
-				createActorStateProvider: () => new MockActorStateProvider(_fabricRuntime, _actionsPerformed),
+					new PersonActorService(context, actorTypeInformation,
+						stateProvider: new StateSessionActorStateProvider(context, 
+						stateSessionManager: new InMemoryStateSessionManager(
+							StateSessionHelper.GetServiceName(context.ServiceName),
+							context.PartitionId,
+							StateSessionHelper.GetPartitionInfo(context, () => _fabricRuntime.PartitionEnumerationManager).GetAwaiter().GetResult(),
+							state), 
+						actorTypeInfo: actorTypeInformation)),
+				createActorStateProvider: (context, actorTypeInformation) => new MockActorStateProvider(_fabricRuntime, _actionsPerformed),
 				serviceDefinition: MockServiceDefinition.CreateUniformInt64Partitions(10, long.MinValue, long.MaxValue));
 
 			Console.WriteLine($"Running with Mock Fabric Runtime {_fabricRuntime.ApplicationName} - {_fabricRuntime.GetHashCode()}");

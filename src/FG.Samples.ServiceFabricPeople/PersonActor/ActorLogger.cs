@@ -137,7 +137,7 @@ namespace PersonActor
 			actorActiveOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _actor.ApplicationTypeName);
 			actorActiveOperationHolder.Telemetry.Properties.Add("ApplicationName", _actor.ApplicationName);
 			actorActiveOperationHolder.Telemetry.Properties.Add("ServiceTypeName", _actor.ServiceTypeName);
-			actorActiveOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ToString());
+			actorActiveOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ServiceName);
 			actorActiveOperationHolder.Telemetry.Properties.Add("PartitionId", _actor.PartitionId.ToString());
 			actorActiveOperationHolder.Telemetry.Properties.Add("ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString());
 			actorActiveOperationHolder.Telemetry.Properties.Add("NodeName", _actor.NodeName);
@@ -197,7 +197,7 @@ namespace PersonActor
 			readStateOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _actor.ApplicationTypeName);
 			readStateOperationHolder.Telemetry.Properties.Add("ApplicationName", _actor.ApplicationName);
 			readStateOperationHolder.Telemetry.Properties.Add("ServiceTypeName", _actor.ServiceTypeName);
-			readStateOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ToString());
+			readStateOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ServiceName);
 			readStateOperationHolder.Telemetry.Properties.Add("PartitionId", _actor.PartitionId.ToString());
 			readStateOperationHolder.Telemetry.Properties.Add("ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString());
 			readStateOperationHolder.Telemetry.Properties.Add("NodeName", _actor.NodeName);
@@ -253,7 +253,7 @@ namespace PersonActor
 			writeStateOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _actor.ApplicationTypeName);
 			writeStateOperationHolder.Telemetry.Properties.Add("ApplicationName", _actor.ApplicationName);
 			writeStateOperationHolder.Telemetry.Properties.Add("ServiceTypeName", _actor.ServiceTypeName);
-			writeStateOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ToString());
+			writeStateOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ServiceName);
 			writeStateOperationHolder.Telemetry.Properties.Add("PartitionId", _actor.PartitionId.ToString());
 			writeStateOperationHolder.Telemetry.Properties.Add("ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString());
 			writeStateOperationHolder.Telemetry.Properties.Add("NodeName", _actor.NodeName);
@@ -292,7 +292,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},

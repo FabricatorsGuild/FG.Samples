@@ -165,7 +165,7 @@ namespace PersonActor
 			recieveActorMessageOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _actor.ApplicationTypeName);
 			recieveActorMessageOperationHolder.Telemetry.Properties.Add("ApplicationName", _actor.ApplicationName);
 			recieveActorMessageOperationHolder.Telemetry.Properties.Add("ServiceTypeName", _actor.ServiceTypeName);
-			recieveActorMessageOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ToString());
+			recieveActorMessageOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ServiceName);
 			recieveActorMessageOperationHolder.Telemetry.Properties.Add("PartitionId", _actor.PartitionId.ToString());
 			recieveActorMessageOperationHolder.Telemetry.Properties.Add("ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString());
 			recieveActorMessageOperationHolder.Telemetry.Properties.Add("NodeName", _actor.NodeName);
@@ -217,7 +217,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -256,7 +256,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -292,7 +292,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -351,7 +351,7 @@ namespace PersonActor
 			recieveServiceMessageOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _actor.ApplicationTypeName);
 			recieveServiceMessageOperationHolder.Telemetry.Properties.Add("ApplicationName", _actor.ApplicationName);
 			recieveServiceMessageOperationHolder.Telemetry.Properties.Add("ServiceTypeName", _actor.ServiceTypeName);
-			recieveServiceMessageOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ToString());
+			recieveServiceMessageOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ServiceName);
 			recieveServiceMessageOperationHolder.Telemetry.Properties.Add("PartitionId", _actor.PartitionId.ToString());
 			recieveServiceMessageOperationHolder.Telemetry.Properties.Add("ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString());
 			recieveServiceMessageOperationHolder.Telemetry.Properties.Add("NodeName", _actor.NodeName);
@@ -403,7 +403,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -446,7 +446,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -477,7 +477,7 @@ namespace PersonActor
 			requestContextOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _actor.ApplicationTypeName);
 			requestContextOperationHolder.Telemetry.Properties.Add("ApplicationName", _actor.ApplicationName);
 			requestContextOperationHolder.Telemetry.Properties.Add("ServiceTypeName", _actor.ServiceTypeName);
-			requestContextOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ToString());
+			requestContextOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ServiceName);
 			requestContextOperationHolder.Telemetry.Properties.Add("PartitionId", _actor.PartitionId.ToString());
 			requestContextOperationHolder.Telemetry.Properties.Add("ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString());
 			requestContextOperationHolder.Telemetry.Properties.Add("NodeName", _actor.NodeName);
@@ -523,7 +523,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -557,7 +557,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -589,7 +589,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -619,7 +619,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -652,7 +652,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -682,7 +682,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -736,7 +736,7 @@ namespace PersonActor
 			callActorOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _actor.ApplicationTypeName);
 			callActorOperationHolder.Telemetry.Properties.Add("ApplicationName", _actor.ApplicationName);
 			callActorOperationHolder.Telemetry.Properties.Add("ServiceTypeName", _actor.ServiceTypeName);
-			callActorOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ToString());
+			callActorOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ServiceName);
 			callActorOperationHolder.Telemetry.Properties.Add("PartitionId", _actor.PartitionId.ToString());
 			callActorOperationHolder.Telemetry.Properties.Add("ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString());
 			callActorOperationHolder.Telemetry.Properties.Add("NodeName", _actor.NodeName);
@@ -788,7 +788,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -852,7 +852,7 @@ namespace PersonActor
 			callServiceOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _actor.ApplicationTypeName);
 			callServiceOperationHolder.Telemetry.Properties.Add("ApplicationName", _actor.ApplicationName);
 			callServiceOperationHolder.Telemetry.Properties.Add("ServiceTypeName", _actor.ServiceTypeName);
-			callServiceOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ToString());
+			callServiceOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ServiceName);
 			callServiceOperationHolder.Telemetry.Properties.Add("PartitionId", _actor.PartitionId.ToString());
 			callServiceOperationHolder.Telemetry.Properties.Add("ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString());
 			callServiceOperationHolder.Telemetry.Properties.Add("NodeName", _actor.NodeName);
@@ -904,7 +904,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
@@ -945,7 +945,7 @@ namespace PersonActor
                     {"ApplicationTypeName", _actor.ApplicationTypeName},
                     {"ApplicationName", _actor.ApplicationName},
                     {"ServiceTypeName", _actor.ServiceTypeName},
-                    {"ServiceName", _actor.ToString()},
+                    {"ServiceName", _actor.ServiceName},
                     {"PartitionId", _actor.PartitionId.ToString()},
                     {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
                     {"NodeName", _actor.NodeName},
