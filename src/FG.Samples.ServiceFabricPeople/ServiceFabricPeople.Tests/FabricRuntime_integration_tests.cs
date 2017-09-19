@@ -68,14 +68,15 @@ namespace ServiceFabricPeople.Tests
 				(service, actorId) => new PersonActor.PersonActor(service, actorId),
 				(context, actorTypeInformation, stateProvider, stateManagerFactory) =>
 					new PersonActorService(context, actorTypeInformation,
-						stateProvider: new StateSessionActorStateProvider(context, 
+						stateProvider: stateProvider),
+				createActorStateProvider: (context, actorTypeInformation) =>
+					new StateSessionActorStateProvider(context,
 						stateSessionManager: new InMemoryStateSessionManager(
 							StateSessionHelper.GetServiceName(context.ServiceName),
 							context.PartitionId,
 							StateSessionHelper.GetPartitionInfo(context, () => _fabricRuntime.PartitionEnumerationManager).GetAwaiter().GetResult(),
-							state), 
-						actorTypeInfo: actorTypeInformation)),
-				createActorStateProvider: (context, actorTypeInformation) => new MockActorStateProvider(_fabricRuntime, _actionsPerformed),
+							state),
+						actorTypeInfo: actorTypeInformation),
 				serviceDefinition: MockServiceDefinition.CreateUniformInt64Partitions(10, long.MinValue, long.MaxValue));
 
 			Console.WriteLine($"Running with Mock Fabric Runtime {_fabricRuntime.ApplicationName} - {_fabricRuntime.GetHashCode()}");
@@ -176,7 +177,7 @@ namespace ServiceFabricPeople.Tests
 		private async Task Setup_persons_with_names_and_titles(ICommunicationLogger logger, CancellationToken ct)
 		{
 			var serviceUri = new Uri("fabric:/Overlord/TitleService");
-			var serviceProxyFactory = new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(logger);
+			var serviceProxyFactory = _fabricRuntime.ServiceProxyFactory;// new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(logger);
 
 			var partitionKeys = new List<long>();
 			foreach (var partition in await _fabricRuntime.PartitionEnumerationManager.GetPartitionListAsync(serviceUri))
@@ -201,7 +202,7 @@ namespace ServiceFabricPeople.Tests
 			{
 				foreach (var name in _names[i % _names.Length])
 				{
-					var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(logger);
+					var actorProxyFactory = _fabricRuntime.ActorProxyFactory; // new FG.ServiceFabric.Actors.Client.ActorProxyFactory(logger);
 					var actor = actorProxyFactory.CreateActorProxy<IPersonActor>(new ActorId(name));
 					await actor.SetTitleAsync(title, ct);
 				}
@@ -308,7 +309,7 @@ namespace ServiceFabricPeople.Tests
 
 			await Setup_persons_with_names_and_titles(logger, ct);
 
-			var serviceProxyFactory = new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(logger);
+			var serviceProxyFactory = _fabricRuntime.ServiceProxyFactory;
 			var titleService = serviceProxyFactory.CreateServiceProxy<IActorServiceMaintenance>(new Uri("fabric:/Overlord/PersonActorService"),
 				new ServicePartitionKey(new ActorId("Bishop").GetPartitionKey()));
 			var states = await titleService.GetStates(new ActorId("Bishop"),  ct);
