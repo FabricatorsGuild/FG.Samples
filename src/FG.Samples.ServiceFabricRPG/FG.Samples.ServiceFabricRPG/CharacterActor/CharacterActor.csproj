@@ -94,6 +94,17 @@
     <Reference Include="System.ServiceModel" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Events\ICreatedEvent.cs" />
+    <Compile Include="Events\IFightEntered.cs" />
+    <Compile Include="Events\IFightEvent.cs" />
+    <Compile Include="Events\IFightExited.cs" />
+    <Compile Include="Events\IHealthChanged.cs" />
+    <Compile Include="Events\IInventoryAdded.cs" />
+    <Compile Include="Events\IInventoryCountChanged.cs" />
+    <Compile Include="Events\IInventoryDropped.cs" />
+    <Compile Include="Events\IInventoryEvent.cs" />
+    <Compile Include="Events\IRootEvent.cs" />
+    <Compile Include="Events\IXPGained.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CharacterActor.cs" />
     <Compile Include="Program.cs" />

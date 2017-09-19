@@ -13,7 +13,7 @@ namespace FG.Samples.ServiceFabricRPG.Tests
 		private ServiceRequestContextWrapperServiceFabricRPG _context;
 
 
-		public Task 
+		
 
     }
 }

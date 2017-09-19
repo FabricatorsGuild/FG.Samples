@@ -17,61 +17,6 @@ namespace CharacterActor
 
 	#region Domain event interfaces
 
-	public interface IRootEvent : IAggregateRootEvent
-	{
-	}
-
-	public interface ICreatedEvent : IRootEvent
-	{
-		string Name { get; set; }
-		int XP { get; set; }
-	}
-
-	public interface IHealthChanged : IRootEvent
-	{
-		int Amount { get; }
-	}
-
-	public interface IXPGained : IRootEvent
-	{
-		int Amount { get; }
-	}
-
-	public interface IInventoryEvent : IRootEvent
-	{
-		MiniId InventoryId { get; }
-	}
-
-	public interface IInventoryAdded : IRootEvent, IInventoryEvent, IInventoryCountChanged
-	{
-		string Name { get; set; }
-	}
-
-	public interface IInventoryDropped : IInventoryEvent, IInventoryCountChanged
-	{
-		int Amount { get; set; }
-	}
-
-	public interface IInventoryCountChanged : IInventoryEvent
-	{
-		int Amount { get; set; }
-	}
-
-	public interface IFightEvent : IRootEvent
-	{
-		MiniId FightId { get; }
-	}
-
-	public interface IFightEntered : IFightEvent
-	{
-		
-	}
-
-	public interface IFightExited : IFightEvent
-	{
-		
-	}
-
 	#endregion
 
 	#region Domain events
@@ -229,6 +174,10 @@ namespace CharacterActor
 		}
 
 		public void Attack(MiniId fightId, MiniId characterId)
+		{
+		}
+
+		public void AttackedBy(MiniId fightId, MiniId characterId)
 		{
 			
 		}
