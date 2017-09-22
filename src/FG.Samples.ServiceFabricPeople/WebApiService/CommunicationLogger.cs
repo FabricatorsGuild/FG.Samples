@@ -281,7 +281,7 @@ namespace WebApiService
 			callActorOperationHolder.Telemetry.Properties.Add("ApplicationName", _context.CodePackageActivationContext.ApplicationName);
 			callActorOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _context.CodePackageActivationContext.ApplicationTypeName);
 			callActorOperationHolder.Telemetry.Properties.Add("NodeName", _context.NodeContext.NodeName);
-			callActorOperationHolder.Telemetry.Properties.Add("RequestUri", requestUri.ToString());
+			callActorOperationHolder.Telemetry.Properties.Add("RequestUri", $"{requestUri}/{actorMethodName}+{actorMessageHeaders?.ActorId}");
 			callActorOperationHolder.Telemetry.Properties.Add("ActorMethodName", actorMethodName);
 			callActorOperationHolder.Telemetry.Properties.Add("InterfaceId", (actorMessageHeaders?.InterfaceId ?? 0).ToString());
 			callActorOperationHolder.Telemetry.Properties.Add("MethodId", (actorMessageHeaders?.MethodId ?? 0).ToString());
@@ -332,7 +332,7 @@ namespace WebApiService
                     {"ApplicationName", _context.CodePackageActivationContext.ApplicationName},
                     {"ApplicationTypeName", _context.CodePackageActivationContext.ApplicationTypeName},
                     {"NodeName", _context.NodeContext.NodeName},
-                    {"RequestUri", requestUri.ToString()},
+                    {"RequestUri", $"{requestUri}/{actorMethodName}+{actorMessageHeaders?.ActorId}"},
                     {"ActorMethodName", actorMethodName},
                     {"InterfaceId", (actorMessageHeaders?.InterfaceId ?? 0).ToString()},
                     {"MethodId", (actorMessageHeaders?.MethodId ?? 0).ToString()},
@@ -394,7 +394,7 @@ namespace WebApiService
 			callServiceOperationHolder.Telemetry.Properties.Add("ApplicationName", _context.CodePackageActivationContext.ApplicationName);
 			callServiceOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _context.CodePackageActivationContext.ApplicationTypeName);
 			callServiceOperationHolder.Telemetry.Properties.Add("NodeName", _context.NodeContext.NodeName);
-			callServiceOperationHolder.Telemetry.Properties.Add("RequestUri", requestUri.ToString());
+			callServiceOperationHolder.Telemetry.Properties.Add("RequestUri", $"{requestUri}/{serviceMethodName}");
 			callServiceOperationHolder.Telemetry.Properties.Add("ServiceMethodName", serviceMethodName);
 			callServiceOperationHolder.Telemetry.Properties.Add("InterfaceId", (serviceMessageHeaders?.InterfaceId ?? 0).ToString());
 			callServiceOperationHolder.Telemetry.Properties.Add("MethodId", (serviceMessageHeaders?.MethodId ?? 0).ToString());

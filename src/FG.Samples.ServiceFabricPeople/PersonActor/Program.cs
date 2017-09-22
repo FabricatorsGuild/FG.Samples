@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Fabric;
 using System.Threading;
-using System.Threading.Tasks;
+using Application;
 using FG.ServiceFabric.Actors.Runtime;
+using FG.ServiceFabric.DocumentDb.CosmosDb;
 using FG.ServiceFabric.Fabric;
 using FG.ServiceFabric.Services.Runtime.StateSession;
 using Microsoft.ServiceFabric.Actors.Runtime;
@@ -25,13 +25,17 @@ namespace PersonActor
 				// For more information, see https://aka.ms/servicefabricactorsplatform
 
 				ActorRuntime.RegisterActorAsync<PersonActor>(
-					(context, actorType) => new PersonActorService(context, actorType, stateProvider:
-						new StateSessionActorStateProvider(context,
-								new FileSystemStateSessionManager(
-									context.ServiceName.AbsoluteUri,
-									context.PartitionId,
-									StateSessionHelper.GetPartitionInfo(context, () => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient())).GetAwaiter().GetResult(),
-									@"c:/temp/sf"), actorType))).GetAwaiter().GetResult();
+					(context, actorType) => {
+						ApplicationInsightsSetup.Setup(ApplicationInsightsSettingsProvider.FromServiceFabricContext(context));
+						return new PersonActorService(context, actorType, stateProvider:
+							new StateSessionActorStateProvider(context, CreateStateManager(context), actorType),
+							settings:
+							new ActorServiceSettings()
+							{
+								ActorGarbageCollectionSettings =
+									new ActorGarbageCollectionSettings(10, 2)
+							});
+					}).GetAwaiter().GetResult();
 
 				Thread.Sleep(Timeout.Infinite);
 			}
@@ -40,6 +44,26 @@ namespace PersonActor
 				ActorEventSource.Current.ActorHostInitializationFailed(e.ToString());
 				throw;
 			}
+		}
+
+		private static IStateSessionManager CreateStateManager(StatefulServiceContext context)
+		{
+			return new DocumentDbStateSessionManager(
+					StateSessionHelper.GetServiceName(context.ServiceName),
+					context.PartitionId,
+					StateSessionHelper.GetPartitionInfo(context,
+						() => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient())).GetAwaiter().GetResult(),
+					new CosmosDbSettingsProvider(context)
+				);
+
+			//return new FileSystemStateSessionManager(
+			//	StateSessionHelper.GetServiceName(context.ServiceName),
+			//	context.PartitionId,
+			//	StateSessionHelper.GetPartitionInfo(context,
+			//		() => new FabricClientQueryManagerPartitionEnumerationManager((new FabricClient()).QueryManager)).GetAwaiter().GetResult(),
+			//	@"c:/temp/planetsandpeople");
+
+			//return new ReliableStateSessionManager(this.StateManager);
 		}
 	}
 }

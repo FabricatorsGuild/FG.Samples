@@ -10,6 +10,8 @@ namespace PersonActor.Interfaces
 	public interface IPersonActorService : IService
 	{
 		Task<IDictionary<string, Person>> GetPersons(CancellationToken cancellationToken);
+
+		Task<string> CreatePerson(string name, string title, CancellationToken cancellationToken);
 	}
 
 	public interface IActorServiceMaintenance : IService

@@ -123,41 +123,53 @@ namespace PersonActor
 
 		}
 
-		public void StartActorActive(
+		public void ActorActivated(
 			bool firstActivation)
 		{
-			PersonActorEventSource.Current.StartActorActive(
+			PersonActorEventSource.Current.ActorActivated(
 				_actor, 
 				firstActivation
 			);
-
-			var actorActiveOperationHolder = _telemetryClient.StartOperation<RequestTelemetry>("actorActive");
-	       actorActiveOperationHolder.Telemetry.Properties.Add("ActorType", _actor.ActorType.ToString());
-			actorActiveOperationHolder.Telemetry.Properties.Add("ActorId", _actor.ActorId.ToString());
-			actorActiveOperationHolder.Telemetry.Properties.Add("ApplicationTypeName", _actor.ApplicationTypeName);
-			actorActiveOperationHolder.Telemetry.Properties.Add("ApplicationName", _actor.ApplicationName);
-			actorActiveOperationHolder.Telemetry.Properties.Add("ServiceTypeName", _actor.ServiceTypeName);
-			actorActiveOperationHolder.Telemetry.Properties.Add("ServiceName", _actor.ServiceName);
-			actorActiveOperationHolder.Telemetry.Properties.Add("PartitionId", _actor.PartitionId.ToString());
-			actorActiveOperationHolder.Telemetry.Properties.Add("ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString());
-			actorActiveOperationHolder.Telemetry.Properties.Add("NodeName", _actor.NodeName);
-			actorActiveOperationHolder.Telemetry.Properties.Add("FirstActivation", firstActivation.ToString());
-	       OperationHolder.StartOperation(actorActiveOperationHolder);
+			_telemetryClient.TrackEvent(
+	            nameof(ActorActivated),
+	            new System.Collections.Generic.Dictionary<string, string>()
+	            {
+	                {"ActorType", _actor.ActorType.ToString()},
+                    {"ActorId", _actor.ActorId.ToString()},
+                    {"ApplicationTypeName", _actor.ApplicationTypeName},
+                    {"ApplicationName", _actor.ApplicationName},
+                    {"ServiceTypeName", _actor.ServiceTypeName},
+                    {"ServiceName", _actor.ServiceName},
+                    {"PartitionId", _actor.PartitionId.ToString()},
+                    {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
+                    {"NodeName", _actor.NodeName},
+                    {"FirstActivation", firstActivation.ToString()}
+	            });
     
 		}
 
 
 
-		public void StopActorActive(
+		public void ActorDeactivated(
 			)
 		{
-			PersonActorEventSource.Current.StopActorActive(
+			PersonActorEventSource.Current.ActorDeactivated(
 				_actor
 			);
-
-			var actorActiveOperationHolder = OperationHolder.StopOperation();
-			_telemetryClient.StopOperation(actorActiveOperationHolder);
-			actorActiveOperationHolder.Dispose();
+			_telemetryClient.TrackEvent(
+	            nameof(ActorDeactivated),
+	            new System.Collections.Generic.Dictionary<string, string>()
+	            {
+	                {"ActorType", _actor.ActorType.ToString()},
+                    {"ActorId", _actor.ActorId.ToString()},
+                    {"ApplicationTypeName", _actor.ApplicationTypeName},
+                    {"ApplicationName", _actor.ApplicationName},
+                    {"ServiceTypeName", _actor.ServiceTypeName},
+                    {"ServiceName", _actor.ServiceName},
+                    {"PartitionId", _actor.PartitionId.ToString()},
+                    {"ReplicaOrInstanceId", _actor.ReplicaOrInstanceId.ToString()},
+                    {"NodeName", _actor.NodeName}
+	            });
     
 		}
 

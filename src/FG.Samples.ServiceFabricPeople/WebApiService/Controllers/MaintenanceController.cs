@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application;
+using FG.Common.Utils;
 using FG.ServiceFabric.Services.Remoting.Runtime.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -18,12 +20,7 @@ namespace WebApiService.Controllers
 	{
 		private readonly object _lock = new object();
 
-		private readonly IWebApiLogger _logger;
-		private readonly ICommunicationLogger _servicesCommunicationLogger;
-
 		private static PartitionHelper _partitionHelper;
-
-		private readonly ServiceRequestContextWrapperServiceFabricPeople _contextScope;
 
 		private PartitionHelper GetOrCreatePartitionHelper()
 		{
@@ -42,25 +39,11 @@ namespace WebApiService.Controllers
 			}
 		}
 
-		public IWebApiLogger Logger => _logger;
-		public IDisposable RequestLoggingContext { get; set; }
-
-		protected override void Dispose(bool disposing)
+		public MaintenanceController(StatelessServiceContext context) : base(context)
 		{
-			base.Dispose(disposing);
-
-			_contextScope.Dispose();
 		}
 
-		public MaintenanceController(StatelessServiceContext context)
-		{
-			_contextScope = new ServiceRequestContextWrapperServiceFabricPeople(correlationId: Guid.NewGuid().ToString(), userId: "mainframe64/Kapten_rödskägg");
-
-			_logger = new WebApiLogger(context);
-			_servicesCommunicationLogger = new CommunicationLogger(context);
-
-			_logger.ActivatingController(_contextScope.CorrelationId, _contextScope.UserId);
-		}
+		
 
 		// GET api/values 
 		public async Task<IDictionary<string, Uri[]>> Get()
@@ -87,10 +70,10 @@ namespace WebApiService.Controllers
 			var serviceUri = new Uri($"{FabricRuntime.GetActivationContext().ApplicationName}/{id}");
 			var allPersons = new Dictionary<string, ActorId[]>();
 
-			var partitionKeys = await GetOrCreatePartitionHelper().GetInt64Partitions(serviceUri, _servicesCommunicationLogger);
+			var partitionKeys = await GetOrCreatePartitionHelper().GetInt64Partitions(serviceUri, ServicesCommunicationLogger);
 			foreach (var partitionKey in partitionKeys)
 			{
-				var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(_servicesCommunicationLogger);
+				var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
 				var proxy = actorProxyFactory.CreateActorServiceProxy<IActorServiceMaintenance>(
 					serviceUri,
 					partitionKey.LowKey);
@@ -107,7 +90,7 @@ namespace WebApiService.Controllers
 		{
 			var serviceUri = new Uri($"{FabricRuntime.GetActivationContext().ApplicationName}/{id}");
 			
-			var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(_servicesCommunicationLogger);
+			var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
 			var proxy = actorProxyFactory.CreateActorServiceProxy<IActorServiceMaintenance>(
 				serviceUri, 
 				new ActorId(actorId));

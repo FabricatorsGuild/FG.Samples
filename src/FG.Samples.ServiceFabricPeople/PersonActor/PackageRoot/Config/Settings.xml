@@ -7,5 +7,14 @@
   <Section Name="PersonActorServiceReplicatorSecurityConfig">
     <Parameter Name="CredentialType" Value="None" />
   </Section>
+  <Section Name="CosmosDb">
+    <Parameter Name="DatabaseName" Value="labs" />
+    <Parameter Name="Collection" Value="peopleandplanets3" />
+    <Parameter Name="EndpointUri" Value="" />
+    <Parameter Name="PrimaryKey" Value="" />
+  </Section>
+  <Section Name="ApplicationInsights">
+    <Parameter Name="Key" Value="00000000-0000-0000-0000-000000000000" />
+  </Section>
   <!-- The content will be generated during build -->
 </Settings>

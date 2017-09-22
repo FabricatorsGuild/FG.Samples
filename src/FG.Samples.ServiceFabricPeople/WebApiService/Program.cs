@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Application;
 
 namespace WebApiService
 {
@@ -21,7 +22,11 @@ namespace WebApiService
                 // an instance of the class is created in this host process.
 
                 ServiceRuntime.RegisterServiceAsync("WebApiServiceType",
-                    context => new WebApiService(context)).GetAwaiter().GetResult();
+	                context =>
+	                {
+						ApplicationInsightsSetup.Setup(ApplicationInsightsSettingsProvider.FromServiceFabricContext(context));
+						return new WebApiService(context);
+	                }).GetAwaiter().GetResult();
 
                 ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(WebApiService).Name);
 

@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
-using Application;
 using FG.ServiceFabric.Services.Remoting.Runtime.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Actors;
-using Microsoft.ServiceFabric.Actors.Client;
 using PersonActor.Interfaces;
-using WebApiService.Diagnostics;
 
 namespace WebApiService.Controllers
 {
@@ -18,21 +15,10 @@ namespace WebApiService.Controllers
     {
         private readonly object _lock = new object();
 
-		private readonly IWebApiLogger _logger;
-		private readonly ICommunicationLogger _servicesCommunicationLogger;
-
         private static PartitionHelper _partitionHelper;
 
-	    private readonly ServiceRequestContextWrapperServiceFabricPeople _contextScope;        
-
-        public PersonController(StatelessServiceContext context)
+        public PersonController(StatelessServiceContext context) : base(context)
         {
-            _contextScope = new ServiceRequestContextWrapperServiceFabricPeople(correlationId: Guid.NewGuid().ToString(), userId: "mainframe64/Kapten_rödskägg");
-
-			_logger = new WebApiLogger(context);
-			_servicesCommunicationLogger = new CommunicationLogger(context);
-
-			_logger.ActivatingController(_contextScope.CorrelationId, _contextScope.UserId);            
 		}
 
         private PartitionHelper GetOrCreatePartitionHelper()
@@ -52,19 +38,6 @@ namespace WebApiService.Controllers
             }
         }
 
-
-        public IDisposable RequestLoggingContext { get; set; }
-
-        public IWebApiLogger Logger => _logger;
-
-        protected override void Dispose(bool disposing)
-	    {
-	        base.Dispose(disposing);
-
-            _contextScope.Dispose();
-
-        }
-
 		[HttpGet]
 		// GET api/person 
 		public async Task<IDictionary<string, IDictionary<string, Person>>> Get()
@@ -72,10 +45,10 @@ namespace WebApiService.Controllers
             var serviceUri = new Uri($"{FabricRuntime.GetActivationContext().ApplicationName}/PersonActorService");
             var allPersons = new Dictionary<string, IDictionary<string, Person>>();
 
-            var partitionKeys = await GetOrCreatePartitionHelper().GetInt64Partitions(serviceUri, _servicesCommunicationLogger);
+            var partitionKeys = await GetOrCreatePartitionHelper().GetInt64Partitions(serviceUri, ServicesCommunicationLogger);
             foreach (var partitionKey in partitionKeys)
             {
-                var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(_servicesCommunicationLogger);
+                var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
                 var proxy = actorProxyFactory.CreateActorServiceProxy<IPersonActorService>(
                     serviceUri,
                     partitionKey.LowKey);
@@ -92,7 +65,7 @@ namespace WebApiService.Controllers
 		public async Task<Person> Get(string id)
 		{
 			var serviceUri = new Uri($"{FabricRuntime.GetActivationContext().ApplicationName}/PersonActorService");
-			var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(_servicesCommunicationLogger);
+			var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
 
 			var proxy = actorProxyFactory.CreateActorProxy<IPersonActor>(
 				serviceUri,
@@ -103,5 +76,48 @@ namespace WebApiService.Controllers
 			return person;
 
 		}
-    }
+
+		[HttpGet("{id}/operation/{operation}/{payload}")]
+		// GET api/person/ardinheli
+		public async Task<Person> Invoke(string id, string operation, string payload)
+		{
+			var serviceUri = new Uri($"{FabricRuntime.GetActivationContext().ApplicationName}/PersonActorService");
+
+			FG.ServiceFabric.Actors.Client.ActorProxyFactory actorProxyFactory = null;
+			IPersonActor actorProxy = null;
+			if ("create".Equals(operation, StringComparison.InvariantCultureIgnoreCase))
+			{
+				var title = payload;
+
+				var serviceProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
+				var serviceProxy = serviceProxyFactory.CreateActorServiceProxy<IPersonActorService>(
+					serviceUri, 
+					new ActorId(id));
+
+				await serviceProxy.CreatePerson(id, title, CancellationToken.None);
+			}
+			else if("settitle".Equals(operation, StringComparison.InvariantCultureIgnoreCase))
+			{
+				var title = payload;
+
+				actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
+
+				actorProxy = actorProxyFactory.CreateActorProxy<IPersonActor>(
+					serviceUri,
+					new ActorId(id));
+
+				await actorProxy.SetTitleAsync(title, CancellationToken.None);
+			}
+
+			actorProxyFactory  = actorProxyFactory ?? new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
+
+			actorProxy = actorProxy ?? actorProxyFactory.CreateActorProxy<IPersonActor>(
+				serviceUri,
+				new ActorId(id));
+
+			var person = await actorProxy.GetPersonAsync(CancellationToken.None);
+
+			return person;
+		}
+	}
 }

@@ -44,7 +44,7 @@ namespace PersonActor
 					firstActivation = true;
 				}
 			}
-			actorLoggerFactory.StartActorActive(firstActivation);
+			actorLoggerFactory.ActorActivated(firstActivation);
 
 			if (person == null)
 			{
@@ -65,7 +65,7 @@ namespace PersonActor
 
 		protected override Task OnDeactivateAsync()
 		{
-			_actorLoggerFactory().StopActorActive();
+			_actorLoggerFactory().ActorDeactivated();
 			return base.OnDeactivateAsync();
 		}
 

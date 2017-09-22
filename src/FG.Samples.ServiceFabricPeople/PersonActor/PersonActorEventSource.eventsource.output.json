@@ -36,31 +36,31 @@
   "ProjectReferences": [
     {
       "ReferenceName": "..\\..\\..\\..\\erviceFabric\\src\\FG.ServiceFabric.Actors.Remoting\\bin\\Debug\\FG.ServiceFabric.Actors.Remoting.dll",
-      "Hash": "08:02:21"
+      "Hash": "09:36:31"
     },
     {
       "ReferenceName": "..\\..\\..\\..\\erviceFabric\\src\\FG.ServiceFabric.Diagnostics\\bin\\Debug\\FG.ServiceFabric.Diagnostics.dll",
-      "Hash": "08:02:19"
+      "Hash": "09:36:34"
     },
     {
       "ReferenceName": "..\\..\\..\\..\\erviceFabric\\src\\FG.ServiceFabric.Extensions\\bin\\Debug\\FG.ServiceFabric.Extensions.dll",
-      "Hash": "12:34:44"
+      "Hash": "09:36:32"
     },
     {
       "ReferenceName": "..\\..\\..\\..\\erviceFabric\\src\\FG.ServiceFabric.Persistence\\bin\\Debug\\FG.ServiceFabric.Persistence.dll",
-      "Hash": "14:00:16"
+      "Hash": "09:36:35"
     },
     {
       "ReferenceName": "..\\..\\..\\..\\erviceFabric\\src\\FG.ServiceFabric.Services.Remoting\\bin\\Debug\\FG.ServiceFabric.Services.Remoting.dll",
-      "Hash": "08:02:18"
+      "Hash": "09:36:30"
     },
     {
       "ReferenceName": "..\\Application\\bin\\Debug\\Application.dll",
-      "Hash": "08:02:20"
+      "Hash": "09:36:35"
     },
     {
       "ReferenceName": "..\\PersonActor.Interfaces\\bin\\x64\\Debug\\PersonActor.Interfaces.dll",
-      "Hash": "16:58:31"
+      "Hash": "20:41:20"
     }
   ],
   "CompileTargets": [
@@ -70,7 +70,7 @@
     },
     {
       "Name": "Diagnostics\\IActorLogger.cs",
-      "Hash": "20381c655fefbfbd664fefbfbd7c2e2f30ec8c91"
+      "Hash": "e5b28116687eefbfbdefbfbd166eefbfbdefbfbd0a10"
     },
     {
       "Name": "Diagnostics\\ICommunicationLogger.cs",
@@ -81,5 +81,5 @@
       "Hash": "c98befbfbd3acda253efbfbd622a19efbfbd1befbfbd36efbfbd"
     }
   ],
-  "Hash": "0b7b7befbfbd41efbfbd6e21efbfbd74efbfbd2031efbfbd2f38"
+  "Hash": "efbfbd0fefbfbd4f09efbfbd13efbfbd0877efbfbdefbfbd76efbfbd3defbfbd"
 }

@@ -33,7 +33,7 @@ namespace ServiceFabricPeople.Tests
     public class FabricRuntime_integration_tests
 	{
 		private MockFabricRuntime _fabricRuntime;
-		private ServiceRequestContextWrapperServiceFabricPeople _context;
+		private ServiceFabricPeopleContext _context;
 
 		private static string[][] _names = new []
 			{
@@ -51,8 +51,11 @@ namespace ServiceFabricPeople.Tests
 		{
 			_fabricRuntime = new MockFabricRuntime("Overlord");
 
-			_context = new ServiceRequestContextWrapperServiceFabricPeople(Guid.NewGuid().ToString(), "testivus");
-			var reliableStateManager = new MockReliableStateManager(_fabricRuntime);
+			var correlationId = Guid.NewGuid().ToString();
+			var userName = "testivus";
+			var authToken = $"{correlationId}|{userName}|{DateTime.UtcNow}".ToBase64();
+			var tenantId = "04D5C3F2-F26C-4EF1-A1FE-FC70BBA427FA";
+			_context = new ServiceFabricPeopleContext(correlationId, userName, authToken, tenantId);
 
 			var state = new Dictionary<string, string>();
 

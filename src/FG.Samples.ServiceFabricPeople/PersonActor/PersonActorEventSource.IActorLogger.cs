@@ -11,10 +11,10 @@ namespace PersonActor
 	internal sealed partial class PersonActorEventSource
 	{
 
-		private const int StartActorActiveEventId = 2001;
+		private const int ActorActivatedEventId = 2001;
 
-		[Event(StartActorActiveEventId, Level = EventLevel.LogAlways, Message = "Start Actor Active {9}", Keywords = Keywords.Actor, Opcode = EventOpcode.Start)]
-		private void StartActorActive(
+		[Event(ActorActivatedEventId, Level = EventLevel.LogAlways, Message = "Actor Activated {9}", Keywords = Keywords.Actor)]
+		private void ActorActivated(
 			string actorType, 
 			string actorId, 
 			string applicationTypeName, 
@@ -27,7 +27,7 @@ namespace PersonActor
 			bool firstActivation)
 		{
 			WriteEvent(
-				StartActorActiveEventId, 
+				ActorActivatedEventId, 
 				actorType, 
 				actorId, 
 				applicationTypeName, 
@@ -41,13 +41,13 @@ namespace PersonActor
 		}
 
 		[NonEvent]
-		public void StartActorActive(
+		public void ActorActivated(
 			FG.ServiceFabric.Diagnostics.ActorOrActorServiceDescription actor, 
 			bool firstActivation)
 		{
 			if (this.IsEnabled())
 			{
-				StartActorActive(
+				ActorActivated(
 					actor.ActorType.ToString(), 
 					actor.ActorId.ToString(), 
 					actor.ApplicationTypeName, 
@@ -62,10 +62,10 @@ namespace PersonActor
 		}
 
 
-		private const int StopActorActiveEventId = 4002;
+		private const int ActorDeactivatedEventId = 4002;
 
-		[Event(StopActorActiveEventId, Level = EventLevel.LogAlways, Message = "Stop Actor Active", Keywords = Keywords.Actor, Opcode = EventOpcode.Stop)]
-		private void StopActorActive(
+		[Event(ActorDeactivatedEventId, Level = EventLevel.LogAlways, Message = "Actor Deactivated", Keywords = Keywords.Actor)]
+		private void ActorDeactivated(
 			string actorType, 
 			string actorId, 
 			string applicationTypeName, 
@@ -77,7 +77,7 @@ namespace PersonActor
 			string nodeName)
 		{
 			WriteEvent(
-				StopActorActiveEventId, 
+				ActorDeactivatedEventId, 
 				actorType, 
 				actorId, 
 				applicationTypeName, 
@@ -90,12 +90,12 @@ namespace PersonActor
 		}
 
 		[NonEvent]
-		public void StopActorActive(
+		public void ActorDeactivated(
 			FG.ServiceFabric.Diagnostics.ActorOrActorServiceDescription actor)
 		{
 			if (this.IsEnabled())
 			{
-				StopActorActive(
+				ActorDeactivated(
 					actor.ActorType.ToString(), 
 					actor.ActorId.ToString(), 
 					actor.ApplicationTypeName, 

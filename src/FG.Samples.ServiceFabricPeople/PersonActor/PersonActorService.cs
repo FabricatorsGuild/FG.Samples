@@ -2,10 +2,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Fabric;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application;
+using FG.Common.Utils;
 using FG.ServiceFabric.Actors.Remoting.Runtime;
 using FG.ServiceFabric.Services.Remoting.FabricTransport;
 using FG.ServiceFabric.Services.Remoting.Runtime.Client;
@@ -47,6 +49,8 @@ namespace PersonActor
 		private readonly object _lock = new object();
 		private static PartitionHelper _partitionHelper;
 
+		private string[] _allTitles;
+
 		private PartitionHelper GetOrCreatePartitionHelper()
 		{
 			if (_partitionHelper != null)
@@ -76,7 +80,10 @@ namespace PersonActor
 			foreach (var partitionKey in partitionKeys)
 			{
 				var correlationId = Guid.NewGuid().ToString();
-				using (new ServiceRequestContextWrapperServiceFabricPeople(correlationId, Environment.UserName))
+				var userName = Environment.UserName;
+				var authToken = $"{DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)}|{userName}|{correlationId}".ToBase64();
+				var tenantId = "04D5C3F2-F26C-4EF1-A1FE-FC70BBA427FA";
+				using (new ServiceFabricPeopleContext(correlationId, userName, authToken, tenantId))
 				{
 					var serviceProxy = serviceProxyFactory.CreateServiceProxy<ITitleService>(
 						new Uri($"{this.Context.CodePackageActivationContext.ApplicationName}/TitleService"),
@@ -85,40 +92,42 @@ namespace PersonActor
 					allTitlesList.AddRange(titles);
 				}
 			}
-			var allTitles = allTitlesList.ToArray();
+			_allTitles = allTitlesList.ToArray();
 
+			var random = new Random(Environment.TickCount);
+			var names = ObjectMother.Names.Select(n => new {Name = n, Ordinal = random.Next(1000)}).OrderBy(i => i.Ordinal).Select(i => i.Name).ToArray();
+			var namesCount = names.Count();
+			var iName = 0;
 			while (true)
 			{
-				var random = new Random(Environment.TickCount);
-
-
-				foreach (var name in ObjectMother.Names.Select(n => new {Name = n, Ordinal = random.Next(1000)}).OrderBy(i => i.Ordinal).Select(i => i.Name))
+				await Task.Delay(1000000, cancellationToken);
+				var name = names[iName % namesCount];
+				iName++;
+				var correlationId = Guid.NewGuid().ToString();
+				var userName = Environment.UserName;
+				var authToken = $"{correlationId}|{userName}|{DateTime.UtcNow}".ToBase64();
+				var tenantId = "04D5C3F2-F26C-4EF1-A1FE-FC70BBA427FA";
+				using (new ServiceFabricPeopleContext(correlationId, userName, authToken, tenantId))
 				{
-					var correlationId = Guid.NewGuid().ToString();
-					using (new ServiceRequestContextWrapperServiceFabricPeople(correlationId, Environment.UserName))
+					var serviceLogger = _serviceLoggerFactory();
+					communicationLogger = _communicationLoggerFactory();
+					using (serviceLogger.RunAsyncLoop())
 					{
-						var serviceLogger = _serviceLoggerFactory();
-						communicationLogger = _communicationLoggerFactory();
-						using (serviceLogger.RunAsyncLoop())
+						try
 						{
-							try
-							{
-								var title = allTitles[Environment.TickCount % allTitles.Length];
+							var title = _allTitles[Environment.TickCount % _allTitles.Length];
 
-								var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(communicationLogger);
-								var proxy = actorProxyFactory.CreateActorProxy<IPersonActor>(new ActorId(name));
-								await proxy.SetTitleAsync(title, cancellationToken);
+							var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(communicationLogger);
+							var proxy = actorProxyFactory.CreateActorProxy<IPersonActor>(new ActorId(name));
+							await proxy.SetTitleAsync(title, cancellationToken);
 
-								serviceLogger.PersonGenerated(name, title);
-							}
-							catch (Exception ex)
-							{
-								serviceLogger.RunAsyncLoopFailed(ex);
-							}
+							serviceLogger.PersonGenerated(name, title);
+						}
+						catch (Exception ex)
+						{
+							serviceLogger.RunAsyncLoopFailed(ex);
 						}
 					}
-
-					await Task.Delay(10000, cancellationToken);
 				}
 			}
 		}
@@ -147,7 +156,25 @@ namespace PersonActor
 			return result;
 		}
 
+		public async Task<string> CreatePerson(string name, string title, CancellationToken cancellationToken)
+		{
+			var serviceLogger = _serviceLoggerFactory();
+			var communicationLogger = _communicationLoggerFactory();
+			try
+			{
+				var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(communicationLogger);
+				var proxy = actorProxyFactory.CreateActorProxy<IPersonActor>(new ActorId(name));
+				await proxy.SetTitleAsync(title, cancellationToken);
 
+				serviceLogger.PersonGenerated(name, title);
+
+				return $"{title} {name}";
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"CreatePerson {name} failed", ex);
+			}
+		}
 
 
 		private readonly IDictionary<string, Type> _actorStates = new ConcurrentDictionary<string, Type>();

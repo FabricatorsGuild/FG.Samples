@@ -8,20 +8,62 @@
     <Parameter Name="PersonActorService_PartitionCount" DefaultValue="10" />
     <Parameter Name="PersonActorService_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="PersonActorService_TargetReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="StateStorageCosmosDb_DatabaseName" DefaultValue="labs" />
+    <Parameter Name="StateStorageCosmosDb_Collection" DefaultValue="dev-sfp" />
+    <Parameter Name="StateStorageCosmosDb_EndpointUri" DefaultValue="" />
+    <Parameter Name="StateStorageCosmosDb_PrimaryKey" DefaultValue="" />
+    <Parameter Name="ApplicationInsights_Key" DefaultValue="00000000-0000-0000-0000-000000000000" />
   </Parameters>
   <!-- Import the ServiceManifest from the ServicePackage. The ServiceManifestName and ServiceManifestVersion 
        should match the Name and Version attributes of the ServiceManifest element defined in the 
        ServiceManifest.xml file. -->
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="TitleServicePkg" ServiceManifestVersion="1.0.0" />
-    <ConfigOverrides />
+    <ConfigOverrides>
+      <ConfigOverride Name="Config">
+        <Settings>
+          <Section Name="CosmosDb">
+            <Parameter Name="DatabaseName" Value="[StateStorageCosmosDb_DatabaseName]" />
+            <Parameter Name="Collection" Value="[StateStorageCosmosDb_Collection]" />
+            <Parameter Name="EndpointUri" Value="[StateStorageCosmosDb_EndpointUri]" />
+            <Parameter Name="PrimaryKey" Value="[StateStorageCosmosDb_PrimaryKey]" />
+          </Section>
+          <Section Name="ApplicationInsights">
+            <Parameter Name="Key" Value="[ApplicationInsights_Key]" />
+          </Section>
+        </Settings>
+      </ConfigOverride>
+    </ConfigOverrides>
   </ServiceManifestImport>
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="PersonActorPkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides>
+      <ConfigOverride Name="Config">
+        <Settings>
+          <Section Name="CosmosDb">
+            <Parameter Name="DatabaseName" Value="[StateStorageCosmosDb_DatabaseName]" />
+            <Parameter Name="Collection" Value="[StateStorageCosmosDb_Collection]" />
+            <Parameter Name="EndpointUri" Value="[StateStorageCosmosDb_EndpointUri]" />
+            <Parameter Name="PrimaryKey" Value="[StateStorageCosmosDb_PrimaryKey]" />
+          </Section>
+          <Section Name="ApplicationInsights">
+            <Parameter Name="Key" Value="[ApplicationInsights_Key]" />
+          </Section>
+        </Settings>
+      </ConfigOverride>
+    </ConfigOverrides>
   </ServiceManifestImport>
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="WebApiServicePkg" ServiceManifestVersion="1.0.0" />
-    <ConfigOverrides />
+    <ConfigOverrides>
+      <ConfigOverride Name="Config">
+        <Settings>
+          <Section Name="ApplicationInsights">
+            <Parameter Name="Key" Value="[ApplicationInsights_Key]" />
+          </Section>
+        </Settings>
+      </ConfigOverride>
+    </ConfigOverrides>
   </ServiceManifestImport>
   <DefaultServices>
     <!-- The section below creates instances of service types, when an instance of this 

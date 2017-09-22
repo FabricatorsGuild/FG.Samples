@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Application;
+using FG.Common.Utils;
 using FG.ServiceFabric.Services.Remoting.Runtime.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Services.Client;
@@ -17,12 +19,7 @@ namespace WebApiService.Controllers
 	{
 		private readonly object _lock = new object();
 
-		private readonly IWebApiLogger _logger;
-		private readonly ICommunicationLogger _servicesCommunicationLogger;
-
 		private static PartitionHelper _partitionHelper;
-
-		private readonly ServiceRequestContextWrapperServiceFabricPeople _contextScope;
 
 		private PartitionHelper GetOrCreatePartitionHelper()
 		{
@@ -41,24 +38,9 @@ namespace WebApiService.Controllers
 			}
 		}
 
-		public IWebApiLogger Logger => _logger;
-		public IDisposable RequestLoggingContext { get; set; }
 
-		protected override void Dispose(bool disposing)
+		public TitleController(StatelessServiceContext context) : base(context)
 		{
-			base.Dispose(disposing);
-
-			_contextScope.Dispose();
-		}
-
-		public TitleController(StatelessServiceContext context)
-		{
-			_contextScope = new ServiceRequestContextWrapperServiceFabricPeople(correlationId: Guid.NewGuid().ToString(), userId: "mainframe64/Kapten_rödskägg");
-
-			_logger = new WebApiLogger(context);
-			_servicesCommunicationLogger = new CommunicationLogger(context);
-
-			_logger.ActivatingController(_contextScope.CorrelationId, _contextScope.UserId);
 		}
 
 
@@ -70,10 +52,10 @@ namespace WebApiService.Controllers
 			var allPersons = new Dictionary<string, IList<string>>();
 
 			var ct = CancellationToken.None;
-			var partitionKeys = await GetOrCreatePartitionHelper().GetInt64Partitions(serviceUri, _servicesCommunicationLogger);
+			var partitionKeys = await GetOrCreatePartitionHelper().GetInt64Partitions(serviceUri, ServicesCommunicationLogger);
 			foreach (var partitionKey in partitionKeys)
 			{
-				var serviceProxyFactory = new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(_servicesCommunicationLogger);
+				var serviceProxyFactory = new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(ServicesCommunicationLogger);
 				var proxy = serviceProxyFactory.CreateServiceProxy<ITitleService>(
 					serviceUri, 
 					new ServicePartitionKey(partitionKey.LowKey));

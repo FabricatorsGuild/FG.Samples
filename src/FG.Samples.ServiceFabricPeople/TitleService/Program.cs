@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
+using Application;
 using FG.ServiceFabric.Actors.Runtime;
+using FG.ServiceFabric.DocumentDb.CosmosDb;
 using FG.ServiceFabric.Fabric;
 using FG.ServiceFabric.Services.Runtime.StateSession;
+using FG.ServiceFabric.Utils;
 using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace TitleService
@@ -25,14 +29,11 @@ namespace TitleService
                 // an instance of the class is created in this host process.
 
                 ServiceRuntime.RegisterServiceAsync("TitleServiceType",
-                    context => new TitleService(context,
-					new FileSystemStateSessionManager(
-						StateSessionHelper.GetServiceName(context.ServiceName),
-						context.PartitionId,
-						StateSessionHelper.GetPartitionInfo(context, 
-						() => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient())).GetAwaiter().GetResult(), 
-						@"c:/temp/sf")
-					)).GetAwaiter().GetResult();
+	                context =>
+	                {
+						ApplicationInsightsSetup.Setup(ApplicationInsightsSettingsProvider.FromServiceFabricContext(context));
+						return new TitleService(context, CreateStateManager(context));
+	                }).GetAwaiter().GetResult();
 
                 ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(TitleService).Name);
 
@@ -45,5 +46,25 @@ namespace TitleService
                 throw;
             }
         }
-    }
+
+		private static IStateSessionManager CreateStateManager(StatefulServiceContext context)
+		{
+			return new DocumentDbStateSessionManager(
+					StateSessionHelper.GetServiceName(context.ServiceName),
+					context.PartitionId,
+					StateSessionHelper.GetPartitionInfo(context,
+						() => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient())).GetAwaiter().GetResult(),
+					new CosmosDbSettingsProvider(context)
+				);
+
+			//return new FileSystemStateSessionManager(
+			//	StateSessionHelper.GetServiceName(context.ServiceName),
+			//	context.PartitionId,
+			//	StateSessionHelper.GetPartitionInfo(context,
+			//		() => new FabricClientQueryManagerPartitionEnumerationManager((new FabricClient()).QueryManager)).GetAwaiter().GetResult(),
+			//	@"c:/temp/planetsandpeople");
+
+			//return new ReliableStateSessionManager(this.StateManager);
+		}
+}
 }
