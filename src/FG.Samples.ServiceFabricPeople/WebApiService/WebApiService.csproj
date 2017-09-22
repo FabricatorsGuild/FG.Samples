@@ -4,6 +4,8 @@
     <TargetFramework>net452</TargetFramework>
     <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <IsServiceFabricServiceProject>True</IsServiceFabricServiceProject>
+    <ApplicationInsightsResourceId>/subscriptions/35be3912-f4a0-4696-9494-e7c17651b2f6/resourcegroups/ce-labs-common-dev/providers/microsoft.insights/components/ce-labs-fabric-ai-dev</ApplicationInsightsResourceId>
+    <ApplicationInsightsAnnotationResourceId>/subscriptions/35be3912-f4a0-4696-9494-e7c17651b2f6/resourcegroups/ce-labs-common-dev/providers/microsoft.insights/components/ce-labs-fabric-ai-dev</ApplicationInsightsAnnotationResourceId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -79,6 +81,9 @@
     <Content Update="WebApiServiceEventSource.eventsource.output.json">
       <DependentUpon>WebApiServiceEventSource.eventsource.json</DependentUpon>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
 </Project>
