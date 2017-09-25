@@ -9,12 +9,13 @@ using FG.ServiceFabric.Services.Remoting.Runtime;
 using FG.ServiceFabric.Services.Runtime.State;
 using FG.ServiceFabric.Services.Runtime.StateSession;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using Microsoft.ServiceFabric.Services.Runtime;
 using TitleService.Diagnostics;
 
 namespace TitleService
 {
 
-	internal sealed class TitleService : FG.ServiceFabric.Services.Runtime.StatefulService, ITitleService, IStatefulServiceMaintenance
+	internal sealed class TitleService : StatefulService, ITitleService, IStatefulServiceMaintenance
 	{
         private readonly ICommunicationLogger _communicationLogger;
 
