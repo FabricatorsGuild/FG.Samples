@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Threading;
@@ -46,6 +47,8 @@ namespace WebApiService.Controllers
             var allPersons = new Dictionary<string, IDictionary<string, Person>>();
 
             var partitionKeys = await GetOrCreatePartitionHelper().GetInt64Partitions(serviceUri, ServicesCommunicationLogger);
+			var getAllPersonsTasks = new List<Task<IDictionary<string, Person>>>();
+			var matchTaskToPartition = new Dictionary<int, string>();
             foreach (var partitionKey in partitionKeys)
             {
                 var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
@@ -53,11 +56,22 @@ namespace WebApiService.Controllers
                     serviceUri,
                     partitionKey.LowKey);
 
-                var persons = await proxy.GetPersons(CancellationToken.None);
-                allPersons.Add(partitionKey.LowKey.ToString(), persons);
+	            var partitionInfo = $"{partitionKey.LowKey} - {partitionKey.HighKey}";
+	            var getPersonsTask = proxy.GetPersons(CancellationToken.None);
+	            getAllPersonsTasks.Add(getPersonsTask);
+	            matchTaskToPartition.Add(getPersonsTask.Id, partitionInfo);
             }
 
-            return allPersons;
+			await Task.WhenAll(getAllPersonsTasks);
+
+			foreach (var getAllPersonsTask in getAllPersonsTasks)
+			{
+				var partitionInfo = matchTaskToPartition[getAllPersonsTask.Id];
+				var result = await getAllPersonsTask;
+				allPersons.Add(partitionInfo, result);
+			}
+
+			return allPersons;
 		}
 
 		[HttpGet("{id}")]
