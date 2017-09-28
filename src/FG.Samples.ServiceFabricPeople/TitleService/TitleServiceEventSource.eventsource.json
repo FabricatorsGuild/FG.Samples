@@ -29,7 +29,7 @@
     }
   ],
   "Name": "TitleServiceEventSource",
-  "ProviderName": "TitleService",
+  "ProviderName": "CE-labs-sfp-dev-TitleService",
   "Keywords": [
     "Communication",
     "TitleService"

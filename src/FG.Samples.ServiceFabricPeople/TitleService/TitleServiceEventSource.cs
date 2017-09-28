@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TitleService
 {
-	[EventSource(Name = "TitleService")]
+	[EventSource(Name = "CE-labs-sfp-dev-TitleService")]
 	internal sealed partial class TitleServiceEventSource : EventSource
 	{
 		public static readonly TitleServiceEventSource Current = new TitleServiceEventSource();

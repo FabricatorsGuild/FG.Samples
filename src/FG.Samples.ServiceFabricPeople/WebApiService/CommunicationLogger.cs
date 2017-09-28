@@ -353,7 +353,7 @@ namespace WebApiService
         public System.IDisposable CallService(
 			System.Uri requestUri,
 			string serviceMethodName,
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders,
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders,
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 		    return new ScopeWrapper(new IDisposable[]
@@ -420,7 +420,7 @@ namespace WebApiService
 		public void CallServiceFailed(
 			System.Uri requestUri,
 			string serviceMethodName,
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders,
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders,
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader,
 			System.Exception ex)
 		{
@@ -568,7 +568,7 @@ namespace WebApiService
 
 
 		public void FailedToReadCustomServiceMessageHeader(
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceRemotingMessageHeaders,
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceRemotingMessageHeaders,
 			System.Exception ex)
 		{
 			WebApiServiceEventSource.Current.FailedToReadCustomServiceMessageHeader(

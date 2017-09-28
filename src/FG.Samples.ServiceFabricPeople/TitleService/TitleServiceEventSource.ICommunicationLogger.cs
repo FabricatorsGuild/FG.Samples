@@ -51,7 +51,7 @@ namespace TitleService
 			System.Fabric.StatefulServiceContext context, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 			if (this.IsEnabled())
@@ -114,7 +114,7 @@ namespace TitleService
 			System.Fabric.StatefulServiceContext context, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 			if (this.IsEnabled())
@@ -185,7 +185,7 @@ namespace TitleService
 			System.Fabric.StatefulServiceContext context, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader, 
 			System.Exception ex)
 		{
@@ -465,7 +465,7 @@ namespace TitleService
 		[NonEvent]
 		public void FailedToReadCustomServiceMessageHeader(
 			System.Fabric.StatefulServiceContext context, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceRemotingMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceRemotingMessageHeaders, 
 			System.Exception ex)
 		{
 			if (this.IsEnabled())
@@ -729,7 +729,7 @@ namespace TitleService
 			System.Fabric.StatefulServiceContext context, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 			if (this.IsEnabled())
@@ -792,7 +792,7 @@ namespace TitleService
 			System.Fabric.StatefulServiceContext context, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 			if (this.IsEnabled())
@@ -863,7 +863,7 @@ namespace TitleService
 			System.Fabric.StatefulServiceContext context, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader, 
 			System.Exception ex)
 		{

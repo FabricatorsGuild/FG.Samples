@@ -47,6 +47,5 @@ namespace Application
 			public const string AuthToken = "authToken";
 			public const string TenantId = "tenantId";
 		}
-
 	}
 }

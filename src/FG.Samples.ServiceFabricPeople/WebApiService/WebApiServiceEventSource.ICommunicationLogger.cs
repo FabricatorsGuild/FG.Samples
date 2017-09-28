@@ -462,8 +462,8 @@ namespace WebApiService
 		public void StartCallService(
 			System.Fabric.StatelessServiceContext context, 
 			System.Uri requestUri, 
-			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			string serviceMethodName,
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 			if (this.IsEnabled())
@@ -525,8 +525,8 @@ namespace WebApiService
 		public void StopCallService(
 			System.Fabric.StatelessServiceContext context, 
 			System.Uri requestUri, 
-			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			string serviceMethodName,
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 			if (this.IsEnabled())
@@ -596,8 +596,8 @@ namespace WebApiService
 		public void CallServiceFailed(
 			System.Fabric.StatelessServiceContext context, 
 			System.Uri requestUri, 
-			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			string serviceMethodName,
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader, 
 			System.Exception ex)
 		{
@@ -875,8 +875,8 @@ namespace WebApiService
 
 		[NonEvent]
 		public void FailedToReadCustomServiceMessageHeader(
-			System.Fabric.StatelessServiceContext context, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceRemotingMessageHeaders, 
+			System.Fabric.StatelessServiceContext context,
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceRemotingMessageHeaders, 
 			System.Exception ex)
 		{
 			if (this.IsEnabled())

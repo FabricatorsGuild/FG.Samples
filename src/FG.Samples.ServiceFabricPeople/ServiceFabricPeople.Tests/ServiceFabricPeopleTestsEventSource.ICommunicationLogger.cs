@@ -205,7 +205,7 @@ namespace ServiceFabricPeople.Tests
 		[NonEvent]
 		public void FailedToReadActorMessageHeaders(
 			string testrun, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceRemotingMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceRemotingMessageHeaders, 
 			System.Exception ex)
 		{
 			if (this.IsEnabled())
@@ -245,7 +245,7 @@ namespace ServiceFabricPeople.Tests
 			string testrun, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 			if (this.IsEnabled())
@@ -284,7 +284,7 @@ namespace ServiceFabricPeople.Tests
 			string testrun, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 			if (this.IsEnabled())
@@ -331,7 +331,7 @@ namespace ServiceFabricPeople.Tests
 			string testrun, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader, 
 			System.Exception ex)
 		{
@@ -517,7 +517,7 @@ namespace ServiceFabricPeople.Tests
 		[NonEvent]
 		public void FailedToReadCustomServiceMessageHeader(
 			string testrun, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceRemotingMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceRemotingMessageHeaders, 
 			System.Exception ex)
 		{
 			if (this.IsEnabled())
@@ -816,7 +816,7 @@ namespace ServiceFabricPeople.Tests
 			string testrun, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 			if (this.IsEnabled())
@@ -855,7 +855,7 @@ namespace ServiceFabricPeople.Tests
 			string testrun, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader)
 		{
 			if (this.IsEnabled())
@@ -902,7 +902,7 @@ namespace ServiceFabricPeople.Tests
 			string testrun, 
 			System.Uri requestUri, 
 			string serviceMethodName, 
-			Microsoft.ServiceFabric.Services.Remoting.ServiceRemotingMessageHeaders serviceMessageHeaders, 
+			Microsoft.ServiceFabric.Services.Remoting.V1.ServiceRemotingMessageHeaders serviceMessageHeaders, 
 			FG.ServiceFabric.Services.Remoting.FabricTransport.CustomServiceRequestHeader customServiceRequestHeader, 
 			System.Exception ex)
 		{

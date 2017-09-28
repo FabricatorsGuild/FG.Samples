@@ -36,7 +36,7 @@
     }
   ],
   "Name": "WebApiServiceEventSource",
-  "ProviderName": "CodeEffect-ServiceFabric-Auditing-WebApi",
+  "ProviderName": "CE-labs-sfp-dev-WebApi",
   "Keywords": [],
   "TypeTemplates": [
   ],

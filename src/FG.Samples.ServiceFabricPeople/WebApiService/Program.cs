@@ -24,8 +24,9 @@ namespace WebApiService
                 ServiceRuntime.RegisterServiceAsync("WebApiServiceType",
 	                context =>
 	                {
-						ApplicationInsightsSetup.Setup(ApplicationInsightsSettingsProvider.FromServiceFabricContext(context));
-						return new WebApiService(context);
+						var service = new WebApiService(context);
+		                ApplicationInsightsSetup.Setup(context, ApplicationInsightsSettingsProvider.FromServiceFabricContext(context));
+						return service;
 	                }).GetAwaiter().GetResult();
 
                 ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(WebApiService).Name);

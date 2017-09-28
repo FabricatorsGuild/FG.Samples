@@ -26,15 +26,16 @@ namespace PersonActor
 
 				ActorRuntime.RegisterActorAsync<PersonActor>(
 					(context, actorType) => {
-						ApplicationInsightsSetup.Setup(ApplicationInsightsSettingsProvider.FromServiceFabricContext(context));
-						return new PersonActorService(context, actorType, stateProvider:
-							new StateSessionActorStateProvider(context, CreateStateManager(context), actorType),
+						var service = new PersonActorService(context, actorType, stateProvider:
+							new StateSessionActorStateProvider(context, StateSessionInitilaizer.CreateStateManager(context), actorType),
 							settings:
 							new ActorServiceSettings()
 							{
 								ActorGarbageCollectionSettings =
 									new ActorGarbageCollectionSettings(10, 2)
 							});
+						ApplicationInsightsSetup.Setup(context, ApplicationInsightsSettingsProvider.FromServiceFabricContext(context));
+						return service;
 					}).GetAwaiter().GetResult();
 
 				Thread.Sleep(Timeout.Infinite);
@@ -44,26 +45,6 @@ namespace PersonActor
 				ActorEventSource.Current.ActorHostInitializationFailed(e.ToString());
 				throw;
 			}
-		}
-
-		private static IStateSessionManager CreateStateManager(StatefulServiceContext context)
-		{
-			return new DocumentDbStateSessionManager(
-					StateSessionHelper.GetServiceName(context.ServiceName),
-					context.PartitionId,
-					StateSessionHelper.GetPartitionInfo(context,
-						() => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient())).GetAwaiter().GetResult(),
-					new CosmosDbSettingsProvider(context)
-				);
-
-			//return new FileSystemStateSessionManager(
-			//	StateSessionHelper.GetServiceName(context.ServiceName),
-			//	context.PartitionId,
-			//	StateSessionHelper.GetPartitionInfo(context,
-			//		() => new FabricClientQueryManagerPartitionEnumerationManager((new FabricClient()).QueryManager)).GetAwaiter().GetResult(),
-			//	@"c:/temp/planetsandpeople");
-
-			//return new ReliableStateSessionManager(this.StateManager);
 		}
 	}
 }

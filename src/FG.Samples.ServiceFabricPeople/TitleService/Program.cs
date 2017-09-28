@@ -14,57 +14,38 @@ using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace TitleService
 {
-    internal static class Program
-    {
-        /// <summary>
-        /// This is the entry point of the service host process.
-        /// </summary>
-        private static void Main()
-        {
-            try
-            {
-                // The ServiceManifest.XML file defines one or more service type names.
-                // Registering a service maps a service type name to a .NET type.
-                // When Service Fabric creates an instance of this service type,
-                // an instance of the class is created in this host process.
-
-                ServiceRuntime.RegisterServiceAsync("TitleServiceType",
-	                context =>
-	                {
-						ApplicationInsightsSetup.Setup(ApplicationInsightsSettingsProvider.FromServiceFabricContext(context));
-						return new TitleService(context, CreateStateManager(context));
-	                }).GetAwaiter().GetResult();
-
-                ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(TitleService).Name);
-
-                // Prevents this host process from terminating so services keep running.
-                Thread.Sleep(Timeout.Infinite);
-            }
-            catch (Exception e)
-            {
-                ServiceEventSource.Current.ServiceHostInitializationFailed(e.ToString());
-                throw;
-            }
-        }
-
-		private static IStateSessionManager CreateStateManager(StatefulServiceContext context)
+	internal static class Program
+	{
+		/// <summary>
+		/// This is the entry point of the service host process.
+		/// </summary>
+		private static void Main()
 		{
-			return new DocumentDbStateSessionManager(
-					StateSessionHelper.GetServiceName(context.ServiceName),
-					context.PartitionId,
-					StateSessionHelper.GetPartitionInfo(context,
-						() => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient())).GetAwaiter().GetResult(),
-					new CosmosDbSettingsProvider(context)
-				);
+			try
+			{
+				// The ServiceManifest.XML file defines one or more service type names.
+				// Registering a service maps a service type name to a .NET type.
+				// When Service Fabric creates an instance of this service type,
+				// an instance of the class is created in this host process.
 
-			//return new FileSystemStateSessionManager(
-			//	StateSessionHelper.GetServiceName(context.ServiceName),
-			//	context.PartitionId,
-			//	StateSessionHelper.GetPartitionInfo(context,
-			//		() => new FabricClientQueryManagerPartitionEnumerationManager((new FabricClient()).QueryManager)).GetAwaiter().GetResult(),
-			//	@"c:/temp/planetsandpeople");
+				ServiceRuntime.RegisterServiceAsync("TitleServiceType",
+					context =>
+					{
+						var service = new TitleService(context, StateSessionInitilaizer.CreateStateManager(context));
+						ApplicationInsightsSetup.Setup(context, ApplicationInsightsSettingsProvider.FromServiceFabricContext(context));
+						return service;
+					}).GetAwaiter().GetResult();
 
-			//return new ReliableStateSessionManager(this.StateManager);
-		}
-}
+				ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(TitleService).Name);
+
+				// Prevents this host process from terminating so services keep running.
+				Thread.Sleep(Timeout.Infinite);
+			}
+			catch (Exception e)
+			{
+				ServiceEventSource.Current.ServiceHostInitializationFailed(e.ToString());
+				throw;
+			}
+		}		
+	}
 }

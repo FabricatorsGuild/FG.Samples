@@ -56,7 +56,7 @@
     }
   ],
   "Name": "PersonActorEventSource",
-  "ProviderName": "PersonActor",
+  "ProviderName": "CE-labs-sfp-dev-PersonActor",
   "Keywords": [
     "ActorDomain",
     "Actor",

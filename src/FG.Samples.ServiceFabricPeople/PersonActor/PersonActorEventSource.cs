@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PersonActor
 {
-	[EventSource(Name = "PersonActor")]
+	[EventSource(Name = "CE-labs-sfp-dev-PersonActor")]
 	internal sealed partial class PersonActorEventSource : EventSource
 	{
 		public static readonly PersonActorEventSource Current = new PersonActorEventSource();

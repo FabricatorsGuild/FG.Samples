@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace WebApiService
 {
-	[EventSource(Name = "CodeEffect-ServiceFabric-Auditing-WebApi")]
+	[EventSource(Name = "CE-labs-sfp-dev-WebApi")]
 	internal sealed partial class WebApiServiceEventSource : EventSource
 	{
 		public static readonly WebApiServiceEventSource Current = new WebApiServiceEventSource();

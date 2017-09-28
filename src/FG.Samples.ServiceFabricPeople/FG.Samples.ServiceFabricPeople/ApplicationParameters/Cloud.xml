@@ -5,5 +5,9 @@
     <Parameter Name="TitleService_MinReplicaSetSize" Value="3" />
     <Parameter Name="TitleService_TargetReplicaSetSize" Value="3" />
     <Parameter Name="WebApiService_InstanceCount" Value="-1" />
+    <Parameter Name="StateStorageCosmosDb_Collection" Value="dev-sfp" />
+    <Parameter Name="StateStorageCosmosDb_EndpointUri" Value="https://ce-labs-dev.documents.azure.com:443/" />
+    <Parameter Name="StateStorageCosmosDb_PrimaryKey" Value="F3YcC30pRvxLfp8pVebpfZQN4C4BdRB1ppJ0tiCt4clKwuMyS6cJ7M1XReCa4EJOGuaj8Kt6wwtdt5H6I0gt9Q==" />
+    <Parameter Name="ApplicationInsights_Key" Value="ea18f1f9-3781-4cdc-973e-69790347349b" />
   </Parameters>
 </Application>
