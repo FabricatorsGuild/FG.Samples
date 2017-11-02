@@ -2,8 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Fabric;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
+using FG.ServiceFabric.Services.Remoting.FabricTransport;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.QuickPulse;
 
 namespace Application
@@ -12,9 +16,10 @@ namespace Application
 	{
 		private const string ParsePerformanceCounterPathRegExPattern = @"\\(?<category>[\w ]*)(?>\((?<instance>[^)]*)\)){0,1}\\(?<counterName>[^""]*)";
 		private static readonly Regex ParsePerformanceCounterPathRegEx = new Regex(ParsePerformanceCounterPathRegExPattern, RegexOptions.Compiled);
+
 		public static void Setup(ServiceContext context, ApplicationInsightsSettingsProvider settingsProvider)
 		{
-			 var configuration = Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration.Active;
+			var configuration = Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration.Active;
 			configuration.InstrumentationKey = settingsProvider.InstrumentationKey;
 
 			var counters = new[]
@@ -29,8 +34,16 @@ namespace Application
 				new {Counter = "\\Service Fabric Actor(*)\\Average milliseconds per load state operation", Name = "Actor average milliseconds per load state operation"},
 				new {Counter = "\\Service Fabric Actor(*)\\# of outstanding requests", Name = "Actor # of outstanding requests"},
 				new {Counter = "\\Service Fabric Actor(*)\\Average milliseconds per request", Name = "Actor average milliseconds per request"},
-				new {Counter = "\\Service Fabric Actor(*)\\Average milliseconds for request deserialization", Name = "Actor average milliseconds for request deserialization"},
-				new {Counter = "\\Service Fabric Actor(*)\\Average milliseconds for response serialization", Name = "Actor average milliseconds for response serialization"},
+				new
+				{
+					Counter = "\\Service Fabric Actor(*)\\Average milliseconds for request deserialization",
+					Name = "Actor average milliseconds for request deserialization"
+				},
+				new
+				{
+					Counter = "\\Service Fabric Actor(*)\\Average milliseconds for response serialization",
+					Name = "Actor average milliseconds for response serialization"
+				},
 				new {Counter = "\\PhysicalDisk(*)\\Avg. Disk Read Queue Length", Name = "PhysicalDisc Avg. Disk Read Queue Length"},
 				new {Counter = "\\PhysicalDisk(*)\\Avg. Disk Write Queue Length", Name = "PhysicalDisc Avg. Disk Write Queue Length"},
 				new {Counter = "\\PhysicalDisk(*)\\Avg. Disk sec/Read", Name = "PhysicalDisc Avg. Disk sec/Read"},
@@ -64,7 +77,8 @@ namespace Application
 				var counterName = match.Groups["counterName"]?.Value ?? "";
 				var instance = match.Groups["instance"]?.Value ?? "";
 
-				var performanceCounterCategory = performanceCounterCategories.FirstOrDefault(cat => cat.CategoryName.Equals(category, StringComparison.InvariantCultureIgnoreCase));
+				var performanceCounterCategory =
+					performanceCounterCategories.FirstOrDefault(cat => cat.CategoryName.Equals(category, StringComparison.InvariantCultureIgnoreCase));
 				if (performanceCounterCategory != null)
 				{
 					var performanceCounters = new List<PerformanceCounter>();
@@ -89,7 +103,7 @@ namespace Application
 						foreach (var performanceCounter in performanceCountersMatching)
 						{
 							var instanceName = performanceCounter.InstanceName;
-							var name = $"{counter.Name}-{instanceName}";
+							var name = $"{performanceCounter.CategoryName} {performanceCounter.CounterName}";
 							var performanceCounterPath = $"\\{performanceCounter.CategoryName}({instanceName})\\{performanceCounter.CounterName}";
 							performanceCollectorModule.Counters.Add(
 								new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCounterCollectionRequest(performanceCounterPath, name));
@@ -106,7 +120,7 @@ namespace Application
 						foreach (var performanceCounter in performanceCountersMatching)
 						{
 							var instanceName = performanceCounter.InstanceName;
-							var name = $"{counter.Name}-{instanceName}";
+							var name = $"{performanceCounter.CategoryName} {performanceCounter.CounterName}";
 							var performanceCounterPath = $"\\{performanceCounter.CategoryName}({instanceName})\\{performanceCounter.CounterName}";
 							performanceCollectorModule.Counters.Add(
 								new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCounterCollectionRequest(performanceCounterPath, name));
@@ -120,7 +134,7 @@ namespace Application
 						if (performanceCounter != null)
 						{
 							var instanceName = performanceCounter.InstanceName;
-							var name = $"{counter.Name}-{instanceName}";
+							var name = $"{performanceCounter.CategoryName} {performanceCounter.CounterName}";
 							var performanceCounterPath = string.IsNullOrWhiteSpace(instanceName)
 								? $"\\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}"
 								: $"\\{performanceCounter.CategoryName}({instanceName})\\{performanceCounter.CounterName}";
@@ -141,8 +155,33 @@ namespace Application
 			performanceCollectorModule.EnableIISExpressPerformanceCounters = true;
 			performanceCollectorModule.Initialize(configuration);
 
-
+			configuration.TelemetryInitializers.Add(new CloudRolePropertyExpanderTelemetryInitializer(context));
 		}
 	}
 
+	public class CloudRolePropertyExpanderTelemetryInitializer : ITelemetryInitializer
+	{
+		private readonly ServiceContext _context;
+		private readonly string _clusterId;
+
+		public CloudRolePropertyExpanderTelemetryInitializer(ServiceContext context)
+		{
+			var clusterManifest = new FabricClient().ClusterManager.GetClusterManifestAsync().GetAwaiter().GetResult();
+			var doc = new XmlDocument();
+			doc.LoadXml(clusterManifest);
+			var clusterId = doc.SelectSingleNode("//ClusterManifest/FabricSettings/Section[@Name=\'Paas\']/Parameter[@Name=\'ClusterId\']/@Value")?.Value ?? $"localhost@{Environment.MachineName}";
+
+			_context = context;
+		}
+
+		public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
+		{
+			telemetry.Context.Properties.Add("ClusterId", _clusterId);
+			telemetry.Context.User.Id = Application.ServiceFabricPeopleContext.Current.UserId;
+			telemetry.Context.Session.Id = Application.ServiceFabricPeopleContext.Current.CorrelationId;
+			telemetry.Context.Component.Version = _context.CodePackageActivationContext.CodePackageVersion;
+			telemetry.Context.Cloud.RoleName = _context.ServiceName.ToString();
+			telemetry.Context.Cloud.RoleInstance = $"{_context.PartitionId}-{_context.ReplicaOrInstanceId}";		
+		}
+	}
 }

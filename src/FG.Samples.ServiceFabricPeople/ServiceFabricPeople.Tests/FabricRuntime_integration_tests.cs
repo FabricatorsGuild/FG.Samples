@@ -49,7 +49,8 @@ namespace ServiceFabricPeople.Tests
 		[SetUp]
 		public void Setup_mock_fabricruntime()
 		{
-			_fabricRuntime = new MockFabricRuntime("Overlord");
+			_fabricRuntime = new MockFabricRuntime();
+			var fabricApplication = _fabricRuntime.RegisterApplication("Overlord");
 
 			var correlationId = Guid.NewGuid().ToString();
 			var userName = "testivus";
@@ -59,7 +60,7 @@ namespace ServiceFabricPeople.Tests
 
 			var state = new Dictionary<string, string>();
 
-			_fabricRuntime.SetupService((context, stateManager) => new TitleService.TitleService(context, 
+			fabricApplication.SetupService((context, stateManager) => new TitleService.TitleService(context, 
 				stateSessionManager: new InMemoryStateSessionManager(
 					StateSessionHelper.GetServiceName(context.ServiceName),
 					context.PartitionId,
@@ -67,7 +68,7 @@ namespace ServiceFabricPeople.Tests
 					state)), 
 				serviceDefinition: MockServiceDefinition.CreateUniformInt64Partitions(10));
 
-			_fabricRuntime.SetupActor<PersonActor.PersonActor, PersonActorService>(
+			fabricApplication.SetupActor<PersonActor.PersonActor, PersonActorService>(
 				(service, actorId) => new PersonActor.PersonActor(service, actorId),
 				(context, actorTypeInformation, stateProvider, stateManagerFactory) =>
 					new PersonActorService(context, actorTypeInformation,
@@ -82,7 +83,7 @@ namespace ServiceFabricPeople.Tests
 						actorTypeInfo: actorTypeInformation),
 				serviceDefinition: MockServiceDefinition.CreateUniformInt64Partitions(10, long.MinValue, long.MaxValue));
 
-			Console.WriteLine($"Running with Mock Fabric Runtime {_fabricRuntime.ApplicationName} - {_fabricRuntime.GetHashCode()}");
+			Console.WriteLine($"Running with Mock Fabric Runtime {fabricApplication.ApplicationInstanceName} - {_fabricRuntime.GetHashCode()}");
 		}
 
 		[TearDown]

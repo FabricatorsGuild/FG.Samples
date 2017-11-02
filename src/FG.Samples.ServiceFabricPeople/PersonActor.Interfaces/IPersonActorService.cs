@@ -12,6 +12,8 @@ namespace PersonActor.Interfaces
 		Task<IDictionary<string, Person>> GetPersons(CancellationToken cancellationToken);
 
 		Task<string> CreatePerson(string name, string title, CancellationToken cancellationToken);
+
+		Task<string> CreateRandomPerson(CancellationToken cancellationToken);
 	}
 
 	public interface IActorServiceMaintenance : IService

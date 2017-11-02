@@ -49,7 +49,14 @@ namespace PersonActor
 		private readonly object _lock = new object();
 		private static PartitionHelper _partitionHelper;
 
+		private static FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory _serviceProxyFactory;
+
 		private string[] _allTitles;
+
+		internal FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory GetServiceProxyFactory(ICommunicationLogger communicationLogger)
+		{	
+			return new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(communicationLogger);
+		}
 
 		private PartitionHelper GetOrCreatePartitionHelper()
 		{
@@ -96,12 +103,14 @@ namespace PersonActor
 
 			var random = new Random(Environment.TickCount);
 			var names = ObjectMother.Names.Select(n => new {Name = n, Ordinal = random.Next(1000)}).OrderBy(i => i.Ordinal).Select(i => i.Name).ToArray();
-			var namesCount = names.Count();
+			var firstNames = ObjectMother.FirstNames.Select(n => new { Name = n, Ordinal = random.Next(1000) }).OrderBy(i => i.Ordinal).Select(i => i.Name).ToArray();
+			var namesCount = names.Length;
+			var firstNamesCount = firstNames.Length;
 			var iName = 0;
 			while (true)
 			{
 				await Task.Delay(1000000, cancellationToken);
-				var name = names[iName % namesCount];
+				var name = $"{firstNames[iName % firstNamesCount]} {names[iName % namesCount]}";
 				iName++;
 				var correlationId = Guid.NewGuid().ToString();
 				var userName = Environment.UserName;
@@ -129,6 +138,32 @@ namespace PersonActor
 						}
 					}
 				}
+			}
+		}
+
+		public async Task<string> CreateRandomPerson(CancellationToken cancellationToken)
+		{
+			var iName = Environment.TickCount;
+			var namesCount = ObjectMother.Names.Length;
+			var firstNamesCount = ObjectMother.FirstNames.Length;
+			var name = $"{ObjectMother.FirstNames[iName % firstNamesCount]} {ObjectMother.Names[iName % namesCount]}";
+			var title = _allTitles[Environment.TickCount % _allTitles.Length];
+
+			var serviceLogger = _serviceLoggerFactory();
+			var communicationLogger = _communicationLoggerFactory();
+			try
+			{
+				var actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(communicationLogger);
+				var proxy = actorProxyFactory.CreateActorProxy<IPersonActor>(new ActorId(name));
+				await proxy.SetTitleAsync(title, cancellationToken);
+
+				serviceLogger.PersonGenerated(name, title);
+
+				return $"{title} {name}";
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"CreatePerson {name} failed", ex);
 			}
 		}
 

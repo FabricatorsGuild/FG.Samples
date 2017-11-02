@@ -30,11 +30,10 @@ namespace TitleService
         {
 	        _stateSessionManager = stateSessionManager;
 	        _communicationLogger = new CommunicationLogger(this.Context);
-			//_stateManager = new DocumentStorageStatefulServiceStateManager(context, new ReliableStateStatefulServiceStateManager(this.StateManager), storageSessionFactory);
 
         }
 
-        protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
+		protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
             return new ServiceReplicaListener[]
             {

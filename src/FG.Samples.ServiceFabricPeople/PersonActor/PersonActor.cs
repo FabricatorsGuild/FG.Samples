@@ -21,6 +21,16 @@ namespace PersonActor
 
 		private const string DomainStateName = @"state";
 
+		private FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory GetServiceProxyFactory()
+		{
+			if (this.ActorService is PersonActorService personActorService)
+			{
+				return personActorService.GetServiceProxyFactory(_communicationLoggerFactory());
+			}
+
+			return new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(_communicationLoggerFactory());
+		}
+
 		public PersonActor(ActorService actorService, ActorId actorId)
 			: base(actorService, actorId)
 		{

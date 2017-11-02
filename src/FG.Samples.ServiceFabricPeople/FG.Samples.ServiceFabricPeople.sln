@@ -61,6 +61,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FG.Common.Tests", "..\..\..
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FG.ServiceFabric.Tests.StatefulService", "..\..\..\FG.ServiceFabric\src\FG.ServiceFabric.Tests.StatefulServiceDemo\FG.ServiceFabric.Tests.StatefulService.csproj", "{8EC70A8E-17FF-4785-9232-E3D97BA1DFDC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebService", "WebService\WebService.csproj", "{C9649D8B-B478-4C38-919C-727C1114E0FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -265,6 +267,12 @@ Global
 		{8EC70A8E-17FF-4785-9232-E3D97BA1DFDC}.Release|Any CPU.ActiveCfg = Release|x64
 		{8EC70A8E-17FF-4785-9232-E3D97BA1DFDC}.Release|x64.ActiveCfg = Release|x64
 		{8EC70A8E-17FF-4785-9232-E3D97BA1DFDC}.Release|x64.Build.0 = Release|x64
+		{C9649D8B-B478-4C38-919C-727C1114E0FF}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{C9649D8B-B478-4C38-919C-727C1114E0FF}.Debug|x64.ActiveCfg = Debug|x64
+		{C9649D8B-B478-4C38-919C-727C1114E0FF}.Debug|x64.Build.0 = Debug|x64
+		{C9649D8B-B478-4C38-919C-727C1114E0FF}.Release|Any CPU.ActiveCfg = Release|x64
+		{C9649D8B-B478-4C38-919C-727C1114E0FF}.Release|x64.ActiveCfg = Release|x64
+		{C9649D8B-B478-4C38-919C-727C1114E0FF}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
