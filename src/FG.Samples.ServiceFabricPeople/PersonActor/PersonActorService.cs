@@ -79,7 +79,7 @@ namespace PersonActor
 		{
 			var communicationLogger = _communicationLoggerFactory();
 
-			var serviceUri = new Uri($"{FabricRuntime.GetActivationContext().ApplicationName}/TitleService");
+			var serviceUri = new Uri($"{this.Context.CodePackageActivationContext.ApplicationName}/TitleService");
 			var partitionKeys = await GetOrCreatePartitionHelper().GetInt64Partitions(serviceUri, communicationLogger);
 			var allTitlesList = new List<string>();
 

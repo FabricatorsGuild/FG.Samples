@@ -13,7 +13,7 @@ using TitleService;
 namespace PersonActor
 {
 	[StatePersistence(StatePersistence.Persisted)]
-	internal class PersonActor : Actor, IPersonActor
+	internal class PersonActor : Actor, IPersonActor, IActor
 	{
 		private readonly Func<IActorDomainLogger> _actorDomainLoggerFactory;
 		private readonly Func<ICommunicationLogger> _communicationLoggerFactory;

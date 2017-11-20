@@ -54,13 +54,13 @@ namespace TitleService
 
 		async Task<string[]> ITitleService.GetPersonsWithTitleAsync(string title, CancellationToken cancellationToken)
         {
-			await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
+			var titles = await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
 
 			PersonStatistics personStatistic = null;
-			using (var session = _stateSessionManager.CreateSession())
+			using (var session = _stateSessionManager.CreateSession(titles))
 			{
 				var storageKey = GetStorageKey(title);
-				var personStatisticValue = await session.TryGetValueAsync<PersonStatistics>(@"titles", storageKey, cancellationToken);
+				var personStatisticValue = await titles.TryGetValueAsync(storageKey, cancellationToken);
 				personStatistic = personStatisticValue.HasValue ? personStatisticValue.Value :
 				   new PersonStatistics() { Title = title, Persons = new string[0] };
 			}
@@ -69,31 +69,33 @@ namespace TitleService
 
 		async Task ITitleService.SetTitleAsync(string person, string title, CancellationToken cancellationToken)
 	    {
-			await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
+			var titles = await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
 
-			using (var session = _stateSessionManager.CreateSession())
+			using (var session = _stateSessionManager.CreateSession(titles))
 			{
 				var storageKey = GetStorageKey(title);
 
-				var personStatisticValue = await session.TryGetValueAsync<PersonStatistics>(@"titles", storageKey, cancellationToken);
+				var personStatisticValue = await titles.TryGetValueAsync(storageKey, cancellationToken);
 				var personStatistic = personStatisticValue.HasValue ? personStatisticValue.Value :
 					new PersonStatistics() { Title = title, Persons = new string[0] };
 
 				var persons = new List<string>(personStatistic.Persons) {person};
 				personStatistic.Persons = persons.ToArray();
 
-				await session.SetValueAsync(@"titles", storageKey, personStatistic, null, cancellationToken);
+				await titles.SetValueAsync(storageKey, personStatistic, null, cancellationToken);
+
+				await session.CommitAsync();
 			}
 		}
 
 	    async Task ITitleService.RemoveTitleAsync(string person, string title, CancellationToken cancellationToken)
 	    {
-			await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
+			var titles = await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
 
-			using (var session = _stateSessionManager.CreateSession())
+			using (var session = _stateSessionManager.CreateSession(titles))
 			{
 				var storageKey = GetStorageKey(title);
-				var personStatisticValue = await session.TryGetValueAsync<PersonStatistics>(@"titles", storageKey, cancellationToken);
+				var personStatisticValue = await titles.TryGetValueAsync(storageKey, cancellationToken);
 				 var personStatistic = personStatisticValue.HasValue ? personStatisticValue.Value : 
 					 new PersonStatistics() { Title = title, Persons = new string[0] };
 
@@ -102,6 +104,8 @@ namespace TitleService
 				personStatistic.Persons = persons.ToArray();
 
 				await session.SetValueAsync(@"titles", storageKey, personStatistic, null, cancellationToken);
+
+				await session.CommitAsync();
 			}
 		}
 

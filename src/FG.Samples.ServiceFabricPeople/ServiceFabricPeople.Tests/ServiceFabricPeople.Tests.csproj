@@ -117,6 +117,7 @@
       <DependentUpon>ServiceFabricPeopleTestsEventSource.eventsource.json</DependentUpon>
     </Compile>
     <Compile Include="FabricRuntime_integration_tests.cs" />
+    <Compile Include="Full_environment_testing.cs" />
     <Compile Include="ICommunicationLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceFabricPeopleTestsEventSource.cs">
@@ -160,7 +161,7 @@
       <Name>FG.ServiceFabric.Services.Remoting</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\FG.ServiceFabric\src\FG.ServiceFabric.Testing\FG.ServiceFabric.Testing.csproj">
-      <Project>{2f2b5701-77b5-4467-9504-8be73a3725a7}</Project>
+      <Project>{2F2B5701-77B5-4467-9504-8BE73A3725A7}</Project>
       <Name>FG.ServiceFabric.Testing</Name>
     </ProjectReference>
     <ProjectReference Include="..\Application\Application.csproj">
@@ -178,6 +179,14 @@
     <ProjectReference Include="..\TitleService\TitleService.csproj">
       <Project>{8e763765-0763-4c91-9d05-dff429ee7d59}</Project>
       <Name>TitleService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebApiService\WebApiService.csproj">
+      <Project>{517492f6-d0ff-410f-a7cc-7c5863a471e0}</Project>
+      <Name>WebApiService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebService\WebService.csproj">
+      <Project>{c9649d8b-b478-4c38-919c-727c1114e0ff}</Project>
+      <Name>WebService</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

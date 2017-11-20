@@ -93,47 +93,75 @@ namespace WebApiService.Controllers
 
 		}
 
-		[HttpGet("{id}/operation/{operation}/{payload}")]
+
+
+	    [HttpGet("{id}/operation/{operation}/{payload}")]
+	    // GET api/person/ardinheli
+	    public async Task<Person> Invoke(string id, string operation, string payload)
+	    {
+		    var serviceUri = new Uri($"{FabricRuntime.GetActivationContext().ApplicationName}/PersonActorService");
+
+		    FG.ServiceFabric.Actors.Client.ActorProxyFactory actorProxyFactory = null;
+		    IPersonActor actorProxy = null;
+		    if ("create".Equals(operation, StringComparison.InvariantCultureIgnoreCase))
+		    {
+			    var title = payload;
+
+			    var serviceProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
+			    var serviceProxy = serviceProxyFactory.CreateActorServiceProxy<IPersonActorService>(
+				    serviceUri,
+				    new ActorId(id));
+
+			    await serviceProxy.CreatePerson(id, title, CancellationToken.None);
+		    }
+		    else if ("settitle".Equals(operation, StringComparison.InvariantCultureIgnoreCase))
+		    {
+			    var title = payload;
+
+			    actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
+
+			    actorProxy = actorProxyFactory.CreateActorProxy<IPersonActor>(
+				    serviceUri,
+				    new ActorId(id));
+
+			    await actorProxy.SetTitleAsync(title, CancellationToken.None);
+		    }
+
+		    actorProxyFactory = actorProxyFactory ?? new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
+
+		    actorProxy = actorProxy ?? actorProxyFactory.CreateActorProxy<IPersonActor>(
+			                 serviceUri,
+			                 new ActorId(id));
+
+		    var person = await actorProxy.GetPersonAsync(CancellationToken.None);
+
+		    return person;
+	    }
+
+		[HttpGet("{id}/create/{title}")]
 		// GET api/person/ardinheli
-		public async Task<Person> Invoke(string id, string operation, string payload)
+		public async Task<Person> Create(string id, string title)
 		{
 			var serviceUri = new Uri($"{FabricRuntime.GetActivationContext().ApplicationName}/PersonActorService");
 
+			var serviceProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
+			var serviceProxy = serviceProxyFactory.CreateActorServiceProxy<IPersonActorService>(
+				serviceUri,
+				new ActorId(id));
+
+			await serviceProxy.CreatePerson(id, title, CancellationToken.None);
+
 			FG.ServiceFabric.Actors.Client.ActorProxyFactory actorProxyFactory = null;
 			IPersonActor actorProxy = null;
-			if ("create".Equals(operation, StringComparison.InvariantCultureIgnoreCase))
-			{
-				var title = payload;
-					
-				var serviceProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
-				var serviceProxy = serviceProxyFactory.CreateActorServiceProxy<IPersonActorService>(
-					serviceUri, 
-					new ActorId(id));
+			actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
 
-				await serviceProxy.CreatePerson(id, title, CancellationToken.None);
-			}
-			else if("settitle".Equals(operation, StringComparison.InvariantCultureIgnoreCase))
-			{
-				var title = payload;
-
-				actorProxyFactory = new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
-
-				actorProxy = actorProxyFactory.CreateActorProxy<IPersonActor>(
-					serviceUri,
-					new ActorId(id));
-
-				await actorProxy.SetTitleAsync(title, CancellationToken.None);
-			}
-
-			actorProxyFactory  = actorProxyFactory ?? new FG.ServiceFabric.Actors.Client.ActorProxyFactory(ServicesCommunicationLogger);
-
-			actorProxy = actorProxy ?? actorProxyFactory.CreateActorProxy<IPersonActor>(
+			actorProxy = actorProxyFactory.CreateActorProxy<IPersonActor>(
 				serviceUri,
 				new ActorId(id));
 
 			var person = await actorProxy.GetPersonAsync(CancellationToken.None);
 
 			return person;
-		}
+		}		
 	}
 }

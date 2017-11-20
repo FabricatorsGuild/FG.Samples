@@ -8,7 +8,7 @@ namespace Application
 		private ApplicationInsightsSettingsProvider(ServiceContext context) : base(context)
 		{
 			Configure()
-				.FromSettings("ApplicationInsights", "Key");
+				.FromSettings("ApplicationInsights", "Key", RegistrationBuilder.KeyNameBuilder.SectionAndKeyName);
 		}
 
 		public static ApplicationInsightsSettingsProvider FromServiceFabricContext(ServiceContext context)

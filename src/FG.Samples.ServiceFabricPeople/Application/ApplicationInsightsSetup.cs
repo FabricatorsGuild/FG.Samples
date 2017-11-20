@@ -65,97 +65,106 @@ namespace Application
 				new {Counter = "\\CE_labs_ai_performancecounters(fgmacbook)\\# times Home was loaded", Name = "Home was loaded"}
 			};
 
-
-			var performanceCollectorModule = new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCollectorModule();
-
-			var performanceCounterCategories = PerformanceCounterCategory.GetCategories();
-
-			foreach (var counter in counters)
+			if (!System.Diagnostics.Debugger.IsAttached)
 			{
-				var match = ParsePerformanceCounterPathRegEx.Match(counter.Counter);
-				var category = match.Groups["category"]?.Value ?? "";
-				var counterName = match.Groups["counterName"]?.Value ?? "";
-				var instance = match.Groups["instance"]?.Value ?? "";
+				var performanceCollectorModule =
+					new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCollectorModule();
 
-				var performanceCounterCategory =
-					performanceCounterCategories.FirstOrDefault(cat => cat.CategoryName.Equals(category, StringComparison.InvariantCultureIgnoreCase));
-				if (performanceCounterCategory != null)
+				var performanceCounterCategories = PerformanceCounterCategory.GetCategories();
+
+				foreach (var counter in counters)
 				{
-					var performanceCounters = new List<PerformanceCounter>();
-					if (performanceCounterCategory.CategoryType == PerformanceCounterCategoryType.MultiInstance)
+					var match = ParsePerformanceCounterPathRegEx.Match(counter.Counter);
+					var category = match.Groups["category"]?.Value ?? "";
+					var counterName = match.Groups["counterName"]?.Value ?? "";
+					var instance = match.Groups["instance"]?.Value ?? "";
+
+					var performanceCounterCategory =
+						performanceCounterCategories.FirstOrDefault(cat =>
+							cat.CategoryName.Equals(category, StringComparison.InvariantCultureIgnoreCase));
+					if (performanceCounterCategory != null)
 					{
-						var instanceNames = performanceCounterCategory.GetInstanceNames();
-						foreach (var instanceName in instanceNames)
+						var performanceCounters = new List<PerformanceCounter>();
+						if (performanceCounterCategory.CategoryType == PerformanceCounterCategoryType.MultiInstance)
 						{
-							performanceCounters.AddRange(performanceCounterCategory.GetCounters(instanceName));
+							var instanceNames = performanceCounterCategory.GetInstanceNames();
+							foreach (var instanceName in instanceNames)
+							{
+								performanceCounters.AddRange(performanceCounterCategory.GetCounters(instanceName));
+							}
 						}
-					}
-					else
-					{
-						performanceCounters.AddRange(performanceCounterCategory.GetCounters());
-					}
-
-					if (instance == "*")
-					{
-						var performanceCountersMatching = performanceCounters.Where(cntr =>
-							cntr.CounterName.Equals(counterName, StringComparison.InvariantCultureIgnoreCase));
-
-						foreach (var performanceCounter in performanceCountersMatching)
+						else
 						{
-							var instanceName = performanceCounter.InstanceName;
-							var name = $"{performanceCounter.CategoryName} {performanceCounter.CounterName}";
-							var performanceCounterPath = $"\\{performanceCounter.CategoryName}({instanceName})\\{performanceCounter.CounterName}";
-							performanceCollectorModule.Counters.Add(
-								new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCounterCollectionRequest(performanceCounterPath, name));
+							performanceCounters.AddRange(performanceCounterCategory.GetCounters());
 						}
-					}
-					else if (instance == "per service")
-					{
-						var serviceInstancePath = $"{context.PartitionId}_{context.ReplicaOrInstanceId}";
 
-						var performanceCountersMatching = performanceCounters.Where(cntr =>
-							cntr.CounterName.Equals(counterName, StringComparison.InvariantCultureIgnoreCase) &&
-							cntr.InstanceName.StartsWith(serviceInstancePath, StringComparison.InvariantCultureIgnoreCase));
-
-						foreach (var performanceCounter in performanceCountersMatching)
+						if (instance == "*")
 						{
-							var instanceName = performanceCounter.InstanceName;
-							var name = $"{performanceCounter.CategoryName} {performanceCounter.CounterName}";
-							var performanceCounterPath = $"\\{performanceCounter.CategoryName}({instanceName})\\{performanceCounter.CounterName}";
-							performanceCollectorModule.Counters.Add(
-								new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCounterCollectionRequest(performanceCounterPath, name));
+							var performanceCountersMatching = performanceCounters.Where(cntr =>
+								cntr.CounterName.Equals(counterName, StringComparison.InvariantCultureIgnoreCase));
+
+							foreach (var performanceCounter in performanceCountersMatching)
+							{
+								var instanceName = performanceCounter.InstanceName;
+								var name = $"{performanceCounter.CategoryName} {performanceCounter.CounterName}";
+								var performanceCounterPath =
+									$"\\{performanceCounter.CategoryName}({instanceName})\\{performanceCounter.CounterName}";
+								performanceCollectorModule.Counters.Add(
+									new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCounterCollectionRequest(
+										performanceCounterPath, name));
+							}
 						}
-					}
-					else
-					{
-						var performanceCounter = performanceCounters.FirstOrDefault(cntr =>
-							cntr.CounterName.Equals(counterName, StringComparison.InvariantCultureIgnoreCase) &&
-							cntr.InstanceName.Equals(instance, StringComparison.InvariantCultureIgnoreCase));
-						if (performanceCounter != null)
+						else if (instance == "per service")
 						{
-							var instanceName = performanceCounter.InstanceName;
-							var name = $"{performanceCounter.CategoryName} {performanceCounter.CounterName}";
-							var performanceCounterPath = string.IsNullOrWhiteSpace(instanceName)
-								? $"\\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}"
-								: $"\\{performanceCounter.CategoryName}({instanceName})\\{performanceCounter.CounterName}";
-							performanceCollectorModule.Counters.Add(
-								new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCounterCollectionRequest(performanceCounterPath, name));
+							var serviceInstancePath = $"{context.PartitionId}_{context.ReplicaOrInstanceId}";
+
+							var performanceCountersMatching = performanceCounters.Where(cntr =>
+								cntr.CounterName.Equals(counterName, StringComparison.InvariantCultureIgnoreCase) &&
+								cntr.InstanceName.StartsWith(serviceInstancePath, StringComparison.InvariantCultureIgnoreCase));
+
+							foreach (var performanceCounter in performanceCountersMatching)
+							{
+								var instanceName = performanceCounter.InstanceName;
+								var name = $"{performanceCounter.CategoryName} {performanceCounter.CounterName}";
+								var performanceCounterPath =
+									$"\\{performanceCounter.CategoryName}({instanceName})\\{performanceCounter.CounterName}";
+								performanceCollectorModule.Counters.Add(
+									new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCounterCollectionRequest(
+										performanceCounterPath, name));
+							}
+						}
+						else
+						{
+							var performanceCounter = performanceCounters.FirstOrDefault(cntr =>
+								cntr.CounterName.Equals(counterName, StringComparison.InvariantCultureIgnoreCase) &&
+								cntr.InstanceName.Equals(instance, StringComparison.InvariantCultureIgnoreCase));
+							if (performanceCounter != null)
+							{
+								var instanceName = performanceCounter.InstanceName;
+								var name = $"{performanceCounter.CategoryName} {performanceCounter.CounterName}";
+								var performanceCounterPath = string.IsNullOrWhiteSpace(instanceName)
+									? $"\\{performanceCounter.CategoryName}\\{performanceCounter.CounterName}"
+									: $"\\{performanceCounter.CategoryName}({instanceName})\\{performanceCounter.CounterName}";
+								performanceCollectorModule.Counters.Add(
+									new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCounterCollectionRequest(
+										performanceCounterPath, name));
+							}
 						}
 					}
 				}
+
+
+
+				foreach (var counter in performanceCollectorModule.Counters)
+				{
+					Debug.WriteLine($"Collecting {counter.PerformanceCounter}");
+				}
+
+				performanceCollectorModule.EnableIISExpressPerformanceCounters = true;
+				performanceCollectorModule.Initialize(configuration);
+
+				configuration.TelemetryInitializers.Add(new CloudRolePropertyExpanderTelemetryInitializer(context));
 			}
-
-
-
-			foreach (var counter in performanceCollectorModule.Counters)
-			{
-				Debug.WriteLine($"Collecting {counter.PerformanceCounter}");
-			}
-
-			performanceCollectorModule.EnableIISExpressPerformanceCounters = true;
-			performanceCollectorModule.Initialize(configuration);
-
-			configuration.TelemetryInitializers.Add(new CloudRolePropertyExpanderTelemetryInitializer(context));
 		}
 	}
 
@@ -176,7 +185,7 @@ namespace Application
 
 		public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
 		{
-			telemetry.Context.Properties.Add("ClusterId", _clusterId);
+			telemetry.Context.Properties["ClusterId"] = _clusterId;
 			telemetry.Context.User.Id = Application.ServiceFabricPeopleContext.Current.UserId;
 			telemetry.Context.Session.Id = Application.ServiceFabricPeopleContext.Current.CorrelationId;
 			telemetry.Context.Component.Version = _context.CodePackageActivationContext.CodePackageVersion;
