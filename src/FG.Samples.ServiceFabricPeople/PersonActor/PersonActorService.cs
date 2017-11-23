@@ -20,19 +20,32 @@ using PersonActor.Diagnostics;
 using PersonActor.Interfaces;
 using TitleService;
 using FG.ServiceFabric.Actors.Runtime;
+using FG.ServiceFabric.Fabric;
+using FG.ServiceFabric.Utils;
 
 namespace PersonActor
 {
 	public class PersonActorService : Microsoft.ServiceFabric.Actors.Runtime.ActorService, IPersonActorService, IActorServiceMaintenance
 	{
+		private readonly ISettingsProvider _settingsProvider;
+		private readonly Func<IPartitionEnumerationManager> _partitionEnumerationManagerFactory;
 		private readonly Func<IServiceDomainLogger> _serviceLoggerFactory;
 		private readonly Func<ICommunicationLogger> _communicationLoggerFactory;
 
-		public PersonActorService(StatefulServiceContext context, ActorTypeInformation actorTypeInfo, Func<Microsoft.ServiceFabric.Actors.Runtime.ActorService, ActorId, Microsoft.ServiceFabric.Actors.Runtime.ActorBase> actorFactory = null,
-			Func<Microsoft.ServiceFabric.Actors.Runtime.ActorBase, IActorStateProvider, IActorStateManager> stateManagerFactory = null, IActorStateProvider stateProvider = null,
-			ActorServiceSettings settings = null) : 
+		public PersonActorService(
+			StatefulServiceContext context, 
+			ActorTypeInformation actorTypeInfo,
+			ISettingsProvider settingsProvider,
+			Func<Microsoft.ServiceFabric.Actors.Runtime.ActorService, ActorId, Microsoft.ServiceFabric.Actors.Runtime.ActorBase> actorFactory = null,
+			Func<Microsoft.ServiceFabric.Actors.Runtime.ActorBase, IActorStateProvider, IActorStateManager> stateManagerFactory = null, 
+			IActorStateProvider stateProvider = null,
+			ActorServiceSettings settings = null,
+			Func<IPartitionEnumerationManager> partitionEnumerationManagerFactory = null
+			) : 
 			base(context, actorTypeInfo, actorFactory, stateManagerFactory, stateProvider, settings)
 		{
+			_settingsProvider = settingsProvider;
+			_partitionEnumerationManagerFactory = partitionEnumerationManagerFactory ?? (() => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient()));
 			_serviceLoggerFactory = () => new ServiceDomainLogger(this, ServiceRequestContext.Current);
 			_communicationLoggerFactory = () => new CommunicationLogger(this);
 
@@ -49,13 +62,11 @@ namespace PersonActor
 		private readonly object _lock = new object();
 		private static PartitionHelper _partitionHelper;
 
-		private static FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory _serviceProxyFactory;
-
 		private string[] _allTitles;
 
-		internal FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory GetServiceProxyFactory(ICommunicationLogger communicationLogger)
+		internal ServiceProxyFactory GetServiceProxyFactory(ICommunicationLogger communicationLogger)
 		{	
-			return new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(communicationLogger);
+			return new ServiceProxyFactory(communicationLogger);
 		}
 
 		private PartitionHelper GetOrCreatePartitionHelper()
@@ -69,7 +80,7 @@ namespace PersonActor
 			{
 				if (_partitionHelper == null)
 				{
-					_partitionHelper = new PartitionHelper();
+					_partitionHelper = new PartitionHelper(_partitionEnumerationManagerFactory);
 				}
 				return _partitionHelper;
 			}
@@ -83,7 +94,7 @@ namespace PersonActor
 			var partitionKeys = await GetOrCreatePartitionHelper().GetInt64Partitions(serviceUri, communicationLogger);
 			var allTitlesList = new List<string>();
 
-			var serviceProxyFactory = new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(communicationLogger);
+			var serviceProxyFactory = new ServiceProxyFactory(communicationLogger);
 			foreach (var partitionKey in partitionKeys)
 			{
 				var correlationId = Guid.NewGuid().ToString();

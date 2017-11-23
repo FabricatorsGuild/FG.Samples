@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
+using FG.ServiceFabric.Fabric;
 using FG.ServiceFabric.Services.Remoting.Runtime.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Actors;
@@ -16,13 +17,15 @@ namespace WebApiService.Controllers
 	[Route("api/[controller]")]
 	public class PersonController : ControllerBase, ILoggableController
     {
-        private readonly object _lock = new object();
+	    private readonly Func<IPartitionEnumerationManager> _partitionEnumerationManagerFactory;
+	    private readonly object _lock = new object();
 
         private static PartitionHelper _partitionHelper;
 
-        public PersonController(StatelessServiceContext context) : base(context)
+        public PersonController(StatelessServiceContext context, Func<IPartitionEnumerationManager> partitionEnumerationManagerFactory) : base(context)
         {
-		}
+	        _partitionEnumerationManagerFactory = partitionEnumerationManagerFactory;
+        }
 
         private PartitionHelper GetOrCreatePartitionHelper()
         {
@@ -35,7 +38,7 @@ namespace WebApiService.Controllers
             {
                 if (_partitionHelper == null)
                 {
-                    _partitionHelper = new PartitionHelper();
+                    _partitionHelper = new PartitionHelper(_partitionEnumerationManagerFactory);
                 }
                 return _partitionHelper;
             }

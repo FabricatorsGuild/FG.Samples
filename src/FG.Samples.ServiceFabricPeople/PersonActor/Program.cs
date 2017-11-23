@@ -6,6 +6,7 @@ using FG.ServiceFabric.Actors.Runtime;
 using FG.ServiceFabric.DocumentDb.CosmosDb;
 using FG.ServiceFabric.Fabric;
 using FG.ServiceFabric.Services.Runtime.StateSession;
+using FG.ServiceFabric.Utils;
 using Microsoft.ServiceFabric.Actors.Runtime;
 
 namespace PersonActor
@@ -28,8 +29,8 @@ namespace PersonActor
 					(context, actorType) => {
 						var service = new PersonActorService(context, actorType, stateProvider:
 							new StateSessionActorStateProvider(context, StateSessionInitilaizer.CreateStateManager(context), actorType),
-							settings:
-							new ActorServiceSettings()
+							settingsProvider: new ServiceConfigSettingsProvider(context),
+							settings: new ActorServiceSettings()
 							{
 								ActorGarbageCollectionSettings =
 									new ActorGarbageCollectionSettings(10, 2)

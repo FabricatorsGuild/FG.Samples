@@ -1,23 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Application;
-using FG.Common.Utils;
-using FG.ServiceFabric.Services.Remoting.Runtime.Client;
+using FG.ServiceFabric.Fabric;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.ServiceFabric.Actors;
 using PersonActor.Interfaces;
-using WebApiService.Diagnostics;
 
 namespace WebApiService.Controllers
 {
 	public class MaintenanceController : ControllerBase, ILoggableController
 	{
+		private readonly StatelessServiceContext _context;
 		private readonly object _lock = new object();
 
 		private static PartitionHelper _partitionHelper;
@@ -33,7 +29,7 @@ namespace WebApiService.Controllers
 			{
 				if (_partitionHelper == null)
 				{
-					_partitionHelper = new PartitionHelper();
+					_partitionHelper = new PartitionHelper(() => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient()));
 				}
 				return _partitionHelper;
 			}
@@ -41,6 +37,7 @@ namespace WebApiService.Controllers
 
 		public MaintenanceController(StatelessServiceContext context) : base(context)
 		{
+			_context = context;
 		}
 
 		
@@ -50,7 +47,7 @@ namespace WebApiService.Controllers
 		{
 			var fabricClient = new FabricClient();
 
-			var applicationName = FabricRuntime.GetActivationContext().ApplicationName;
+			var applicationName = _context.CodePackageActivationContext.ApplicationName;
 			var serviceList = await fabricClient.QueryManager.GetServiceListAsync(new Uri(applicationName));
 
 			var servicesByKind = serviceList.GroupBy(s => s.ServiceKind.ToString());

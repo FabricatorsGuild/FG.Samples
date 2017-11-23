@@ -1,4 +1,5 @@
 ﻿using FG.ServiceFabric.Diagnostics;
+using FG.ServiceFabric.Fabric;
 using FG.ServiceFabric.Services.Remoting.Runtime.Client;
 
 namespace ServiceFabricPeople.Tests

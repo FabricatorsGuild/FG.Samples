@@ -9,6 +9,7 @@ using Application;
 using FG.Common.Async;
 using FG.Common.Utils;
 using FG.ServiceFabric.Actors.Runtime;
+using FG.ServiceFabric.DocumentDb.CosmosDb;
 using FG.ServiceFabric.Services.Remoting.FabricTransport;
 using FG.ServiceFabric.Services.Runtime;
 using FG.ServiceFabric.Services.Runtime.State;
@@ -18,6 +19,8 @@ using FG.ServiceFabric.Testing.Mocks.Actors.Runtime;
 using FG.ServiceFabric.Testing.Mocks.Data;
 using FG.ServiceFabric.Testing.Mocks.Fabric;
 using FG.ServiceFabric.Testing.Mocks.Services.Runtime;
+using FG.ServiceFabric.Testing.Setup;
+using FG.ServiceFabric.Utils;
 using FluentAssertions;
 using Microsoft.ServiceFabric.Actors;
 using Microsoft.ServiceFabric.Actors.Runtime;
@@ -30,9 +33,63 @@ using TitleService;
 namespace ServiceFabricPeople.Tests
 {
 	// ReSharper disable InconsistentNaming
-    public class FabricRuntime_integration_tests
+
+	public class FabricRuntime_integration_tests_with_InMemory_storage : FabricRuntime_integration_tests
 	{
-		private MockFabricRuntime _fabricRuntime;
+		
+	}
+
+
+	public class FabricRuntime_integration_tests_with_DocumentDb_storage : FabricRuntime_integration_tests
+	{
+		private DocumentDbStateSessionManager _documentDbStateSessionManager;
+
+		protected override IStateSessionManager GetStateSessionManager(ServiceContext context)
+		{
+			_documentDbStateSessionManager = new DocumentDbStateSessionManager(
+				StateSessionHelper.GetServiceName(context.ServiceName),
+				context.PartitionId,
+				StateSessionHelper.GetPartitionInfo(context, () => _fabricRuntime.PartitionEnumerationManager).GetAwaiter().GetResult(),
+				new CosmosDbForTestingSettingsProvider("https://172.27.91.234:8081/", "sfp-local1", "test", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==")
+			);
+			return _documentDbStateSessionManager;
+		}
+
+		private class CosmosDbForTestingSettingsProvider : ISettingsProvider
+		{
+			private readonly IDictionary<string, string> _settings = new Dictionary<string, string>();
+
+			public CosmosDbForTestingSettingsProvider(string endpointUri, string databaseName, string collection, string primaryKey)
+			{
+				_settings.Add($"{CosmosDbSettingsProvider.ConfigSection}.{CosmosDbSettingsProvider.ConfigKeyEndpointUri}", endpointUri);
+				_settings.Add($"{CosmosDbSettingsProvider.ConfigSection}.{CosmosDbSettingsProvider.ConfigKeyDatabaseName}", databaseName);
+				_settings.Add($"{CosmosDbSettingsProvider.ConfigSection}.{CosmosDbSettingsProvider.ConfigKeyCollection}", collection);
+				_settings.Add($"{CosmosDbSettingsProvider.ConfigSection}.{CosmosDbSettingsProvider.ConfigKeyPrimaryKey}", primaryKey);
+			}
+
+			public bool Contains(string key)
+			{
+				return _settings.ContainsKey(key);
+			}
+
+			public string this[string key] => _settings[key];
+
+			public string[] Keys => _settings.Keys.ToArray();			
+		}
+
+		protected override void ClearStateSessionManager()
+		{
+			base.ClearStateSessionManager();
+
+			var documentDbDataManager = (_documentDbStateSessionManager as IDocumentDbDataManager);
+			documentDbDataManager.DestroyCollecton(documentDbDataManager.GetCollectionName());
+		}
+	}
+
+
+	public abstract class FabricRuntime_integration_tests
+	{
+		protected MockFabricRuntime _fabricRuntime;
 		private ServiceFabricPeopleContext _context;
 
 		private static string[][] _names = new []
@@ -46,6 +103,24 @@ namespace ServiceFabricPeople.Tests
 		private readonly IList<string> _actionsPerformed = new List<string>();
 		//private MockActorStateProvider _actorStateProvider;
 
+		private Dictionary<string, string> _state = new Dictionary<string, string>();
+
+		protected virtual IStateSessionManager GetStateSessionManager(ServiceContext context)
+		{
+			return new InMemoryStateSessionManager(
+				StateSessionHelper.GetServiceName(context.ServiceName),
+				context.PartitionId,
+				StateSessionHelper.GetPartitionInfo(context, () => _fabricRuntime.PartitionEnumerationManager).GetAwaiter().GetResult(),
+				_state);
+		}
+
+		protected virtual void ClearStateSessionManager()
+		{
+			_state.Clear();
+		}
+
+		
+
 		[SetUp]
 		public void Setup_mock_fabricruntime()
 		{
@@ -58,28 +133,20 @@ namespace ServiceFabricPeople.Tests
 			var tenantId = "04D5C3F2-F26C-4EF1-A1FE-FC70BBA427FA";
 			_context = new ServiceFabricPeopleContext(correlationId, userName, authToken, tenantId);
 
-			var state = new Dictionary<string, string>();
-
 			fabricApplication.SetupService((context, stateManager) => new TitleService.TitleService(context, 
-				stateSessionManager: new InMemoryStateSessionManager(
-					StateSessionHelper.GetServiceName(context.ServiceName),
-					context.PartitionId,
-					StateSessionHelper.GetPartitionInfo(context, () => _fabricRuntime.PartitionEnumerationManager).GetAwaiter().GetResult(),
-					state)), 
+				stateSessionManager: GetStateSessionManager(context)), 
 				serviceDefinition: MockServiceDefinition.CreateUniformInt64Partitions(10));
 
 			fabricApplication.SetupActor<PersonActor.PersonActor, PersonActorService>(
 				(service, actorId) => new PersonActor.PersonActor(service, actorId),
 				(context, actorTypeInformation, stateProvider, stateManagerFactory) =>
 					new PersonActorService(context, actorTypeInformation,
-						stateProvider: stateProvider),
+						settingsProvider: new MockFabricRuntimeSettingsProvider(context),
+						stateProvider: stateProvider,
+						partitionEnumerationManagerFactory: () => _fabricRuntime.PartitionEnumerationManager),
 				createActorStateProvider: (context, actorTypeInformation) =>
 					new StateSessionActorStateProvider(context,
-						stateSessionManager: new InMemoryStateSessionManager(
-							StateSessionHelper.GetServiceName(context.ServiceName),
-							context.PartitionId,
-							StateSessionHelper.GetPartitionInfo(context, () => _fabricRuntime.PartitionEnumerationManager).GetAwaiter().GetResult(),
-							state),
+						stateSessionManager: GetStateSessionManager(context),
 						actorTypeInfo: actorTypeInformation),
 				serviceDefinition: MockServiceDefinition.CreateUniformInt64Partitions(10, long.MinValue, long.MaxValue));
 
@@ -90,6 +157,8 @@ namespace ServiceFabricPeople.Tests
 		public void Teardown_mock_fabricruntime()
 		{
 			_context?.Dispose();
+
+			ClearStateSessionManager();
 		}
 
 		[Test]

@@ -8,6 +8,7 @@ using FG.Common.Utils;
 using FG.ServiceFabric.Actors.Runtime;
 using FG.ServiceFabric.Services.Runtime.StateSession;
 using FG.ServiceFabric.Testing.Mocks;
+using FG.ServiceFabric.Testing.Setup;
 using FluentAssertions;
 using Microsoft.ServiceFabric.Actors;
 using Microsoft.ServiceFabric.Actors.Runtime;

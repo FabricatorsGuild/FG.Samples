@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application;
 using FG.Common.Utils;
+using FG.ServiceFabric.Fabric;
 using FG.ServiceFabric.Services.Remoting.Runtime.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Services.Client;
@@ -17,6 +18,7 @@ namespace WebApiService.Controllers
 	[Route("api/[controller]")]
 	public class TitleController : ControllerBase, ILoggableController
 	{
+		private readonly Func<IPartitionEnumerationManager> _partitionEnumerationManagerFactory;
 		private readonly object _lock = new object();
 
 		private static PartitionHelper _partitionHelper;
@@ -32,15 +34,16 @@ namespace WebApiService.Controllers
 			{
 				if (_partitionHelper == null)
 				{
-					_partitionHelper = new PartitionHelper();
+					_partitionHelper = new PartitionHelper(_partitionEnumerationManagerFactory);
 				}
 				return _partitionHelper;
 			}
 		}
 
 
-		public TitleController(StatelessServiceContext context) : base(context)
+		public TitleController(StatelessServiceContext context, Func<IPartitionEnumerationManager> partitionEnumerationManagerFactory) : base(context)
 		{
+			_partitionEnumerationManagerFactory = partitionEnumerationManagerFactory;
 		}
 
 
