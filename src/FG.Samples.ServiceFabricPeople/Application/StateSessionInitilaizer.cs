@@ -10,7 +10,7 @@ namespace Application
 	{
 		public static IStateSessionManager CreateStateManager(StatefulServiceContext context)
 		{
-			return new DocumentDbStateSessionManager(
+			return new DocumentDbStateSessionManagerWithTransactions(
 					StateSessionHelper.GetServiceName(context.ServiceName),
 					context.PartitionId,
 					StateSessionHelper.GetPartitionInfo(context,
