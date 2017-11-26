@@ -36,21 +36,40 @@ namespace ServiceFabricPeople.Tests
 
 	public class FabricRuntime_integration_tests_with_InMemory_storage : FabricRuntime_integration_tests
 	{
-		
+	}
+
+	public class FabricRuntime_integration_tests_with_FileSystem_storage : FabricRuntime_integration_tests
+	{
+		private FileSystemStateSessionManager _documentDbStateSessionManager;
+
+		protected override IStateSessionManager GetStateSessionManager(ServiceContext context)
+		{
+			_documentDbStateSessionManager = new FileSystemStateSessionManager(
+				StateSessionHelper.GetServiceName(context.ServiceName),
+				context.PartitionId,
+				StateSessionHelper.GetPartitionInfo(context, () => _fabricRuntime.PartitionEnumerationManager).GetAwaiter().GetResult(),
+				$@"c:\temp\storage\{ApplicationName}"
+			);
+			return _documentDbStateSessionManager;
+		}
 	}
 
 
 	public class FabricRuntime_integration_tests_with_DocumentDb_storage : FabricRuntime_integration_tests
 	{
 		private DocumentDbStateSessionManager _documentDbStateSessionManager;
+		private CosmosDbForTestingSettingsProvider _cosmosDbSettingsProvider;
 
 		protected override IStateSessionManager GetStateSessionManager(ServiceContext context)
 		{
+			_cosmosDbSettingsProvider = new CosmosDbForTestingSettingsProvider("https://172.27.82.113:8081", "sfp-local1",
+				ApplicationName,
+				"C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
 			_documentDbStateSessionManager = new DocumentDbStateSessionManager(
 				StateSessionHelper.GetServiceName(context.ServiceName),
 				context.PartitionId,
 				StateSessionHelper.GetPartitionInfo(context, () => _fabricRuntime.PartitionEnumerationManager).GetAwaiter().GetResult(),
-				new CosmosDbForTestingSettingsProvider("https://172.27.91.234:8081/", "sfp-local1", "test", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==")
+				_cosmosDbSettingsProvider
 			);
 			return _documentDbStateSessionManager;
 		}
@@ -91,6 +110,12 @@ namespace ServiceFabricPeople.Tests
 	{
 		protected MockFabricRuntime _fabricRuntime;
 		private ServiceFabricPeopleContext _context;
+		protected MockFabricApplication _fabricApplication;
+
+		protected string ApplicationName => _fabricApplication.ApplicationInstanceName;
+
+		private Uri PersonActorServiceUri => new Uri($"fabric:/{ApplicationName}/PersonActorService");
+		private Uri TitleServiceUri => new Uri($"fabric:/{ApplicationName}/TitleService");
 
 		private static string[][] _names = new []
 			{
@@ -124,8 +149,8 @@ namespace ServiceFabricPeople.Tests
 		[SetUp]
 		public void Setup_mock_fabricruntime()
 		{
-			_fabricRuntime = new MockFabricRuntime();
-			var fabricApplication = _fabricRuntime.RegisterApplication("Overlord");
+			_fabricRuntime = new MockFabricRuntime(){DisableMethodCallOutput = true};
+			_fabricApplication = _fabricRuntime.RegisterApplication($"App-{new MiniId().Id.Replace("/", "").Replace("+", "")}");
 
 			var correlationId = Guid.NewGuid().ToString();
 			var userName = "testivus";
@@ -133,11 +158,11 @@ namespace ServiceFabricPeople.Tests
 			var tenantId = "04D5C3F2-F26C-4EF1-A1FE-FC70BBA427FA";
 			_context = new ServiceFabricPeopleContext(correlationId, userName, authToken, tenantId);
 
-			fabricApplication.SetupService((context, stateManager) => new TitleService.TitleService(context, 
+			_fabricApplication.SetupService((context, stateManager) => new TitleService.TitleService(context, 
 				stateSessionManager: GetStateSessionManager(context)), 
 				serviceDefinition: MockServiceDefinition.CreateUniformInt64Partitions(10));
 
-			fabricApplication.SetupActor<PersonActor.PersonActor, PersonActorService>(
+			_fabricApplication.SetupActor<PersonActor.PersonActor, PersonActorService>(
 				(service, actorId) => new PersonActor.PersonActor(service, actorId),
 				(context, actorTypeInformation, stateProvider, stateManagerFactory) =>
 					new PersonActorService(context, actorTypeInformation,
@@ -150,7 +175,7 @@ namespace ServiceFabricPeople.Tests
 						actorTypeInfo: actorTypeInformation),
 				serviceDefinition: MockServiceDefinition.CreateUniformInt64Partitions(10, long.MinValue, long.MaxValue));
 
-			Console.WriteLine($"Running with Mock Fabric Runtime {fabricApplication.ApplicationInstanceName} - {_fabricRuntime.GetHashCode()}");
+			Console.WriteLine($"Running with Mock Fabric Runtime {_fabricApplication.ApplicationInstanceName} - {_fabricRuntime.GetHashCode()}");
 		}
 
 		[TearDown]
@@ -203,10 +228,10 @@ namespace ServiceFabricPeople.Tests
 			var serviceProxyFactory = new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(logger);
 
 			var titles = new List<string>();
-			var titlePartitions = await _fabricRuntime.PartitionEnumerationManager.GetPartitionListAsync(new Uri("fabric:/Overlord/TitleService"));
+			var titlePartitions = await _fabricRuntime.PartitionEnumerationManager.GetPartitionListAsync(TitleServiceUri);
 			foreach (var titlePartition in titlePartitions)
 			{
-				var titleService = serviceProxyFactory.CreateServiceProxy<ITitleService>(new Uri("fabric:/Overlord/TitleService"),
+				var titleService = serviceProxyFactory.CreateServiceProxy<ITitleService>(TitleServiceUri,
 					new ServicePartitionKey((titlePartition.PartitionInformation as Int64RangePartitionInformation).LowKey));
 				titles.AddRange(await titleService.GetTitlesAsync(ct));
 			}
@@ -234,7 +259,7 @@ namespace ServiceFabricPeople.Tests
 			foreach (var title in titles)
 			{
 				Console.WriteLine($"{title}");
-				var titleService = serviceProxyFactory.CreateServiceProxy<ITitleService>(new Uri("fabric:/Overlord/TitleService"),
+				var titleService = serviceProxyFactory.CreateServiceProxy<ITitleService>(TitleServiceUri,
 					new ServicePartitionKey(TitleServicePartitionSelector.GetPartition(title)));
 				var personsWithTitleAsync = await titleService.GetPersonsWithTitleAsync(title, ct);
 				foreach (var name in personsWithTitleAsync)
@@ -249,7 +274,7 @@ namespace ServiceFabricPeople.Tests
 
 		private async Task Setup_persons_with_names_and_titles(ICommunicationLogger logger, CancellationToken ct)
 		{
-			var serviceUri = new Uri("fabric:/Overlord/TitleService");
+			var serviceUri = TitleServiceUri;
 			var serviceProxyFactory = _fabricRuntime.ServiceProxyFactory;// new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(logger);
 
 			var partitionKeys = new List<long>();
@@ -310,13 +335,13 @@ namespace ServiceFabricPeople.Tests
 			await actor.SetTitleAsync("Doctor", ct);
 
 			var serviceProxyFactory = new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(logger);
-			var titleService = serviceProxyFactory.CreateServiceProxy<ITitleService>(new Uri("fabric:/Overlord/TitleService"),
+			var titleService = serviceProxyFactory.CreateServiceProxy<ITitleService>(TitleServiceUri,
 				new ServicePartitionKey(TitleServicePartitionSelector.GetPartition("Doctor")));
 
 			var personsWithTitleAsync = await titleService.GetPersonsWithTitleAsync("Doctor", ct);
 			personsWithTitleAsync.ShouldBeEquivalentTo(new[] { "Mikey", "Brand", "Chunk", "Mouth", "Andy", "Stef", "Data", "Navarre" });
 
-			titleService = serviceProxyFactory.CreateServiceProxy<ITitleService>(new Uri("fabric:/Overlord/TitleService"),
+			titleService = serviceProxyFactory.CreateServiceProxy<ITitleService>(TitleServiceUri,
 				new ServicePartitionKey(TitleServicePartitionSelector.GetPartition("Fraulein")));
 
 			personsWithTitleAsync = await titleService.GetPersonsWithTitleAsync("Fraulein", ct);
@@ -332,11 +357,11 @@ namespace ServiceFabricPeople.Tests
 			var logger = new CommunicationLogger(Guid.NewGuid().ToString().Substring(0, 6).ToMD5().ToUpperInvariant());
 
 			var actorIds = new List<ActorId>();
-			var partitionList = await _fabricRuntime.PartitionEnumerationManager.GetPartitionListAsync(new Uri("fabric:/Overlord/PersonActorService"));
+			var partitionList = await _fabricRuntime.PartitionEnumerationManager.GetPartitionListAsync(PersonActorServiceUri);
 			foreach (var partition in partitionList)
 			{
 				var serviceProxyFactory = new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(logger);
-				var personActorMaintenance = serviceProxyFactory.CreateServiceProxy<IActorServiceMaintenance>(new Uri("fabric:/Overlord/PersonActorService"),
+				var personActorMaintenance = serviceProxyFactory.CreateServiceProxy<IActorServiceMaintenance>(PersonActorServiceUri,
 					new ServicePartitionKey((partition.PartitionInformation as Int64RangePartitionInformation).LowKey));
 				actorIds.AddRange(await personActorMaintenance.GetActors(ct));
 			}
@@ -354,11 +379,11 @@ namespace ServiceFabricPeople.Tests
 
 			await Setup_persons_with_names_and_titles(logger, ct);
 			var actorIds = new List<ActorId>();
-			var partitionList = await _fabricRuntime.PartitionEnumerationManager.GetPartitionListAsync(new Uri("fabric:/Overlord/PersonActorService"));
+			var partitionList = await _fabricRuntime.PartitionEnumerationManager.GetPartitionListAsync(PersonActorServiceUri);
 			foreach (var partition in partitionList)
 			{
 				var serviceProxyFactory = new FG.ServiceFabric.Services.Remoting.Runtime.Client.ServiceProxyFactory(logger);
-				var personActorMaintenance = serviceProxyFactory.CreateServiceProxy<IActorServiceMaintenance>(new Uri("fabric:/Overlord/PersonActorService"),
+				var personActorMaintenance = serviceProxyFactory.CreateServiceProxy<IActorServiceMaintenance>(PersonActorServiceUri,
 					new ServicePartitionKey((partition.PartitionInformation as Int64RangePartitionInformation).LowKey));
 				actorIds.AddRange(await personActorMaintenance.GetActors(ct));
 			}
@@ -383,7 +408,7 @@ namespace ServiceFabricPeople.Tests
 			await Setup_persons_with_names_and_titles(logger, ct);
 
 			var serviceProxyFactory = _fabricRuntime.ServiceProxyFactory;
-			var titleService = serviceProxyFactory.CreateServiceProxy<IActorServiceMaintenance>(new Uri("fabric:/Overlord/PersonActorService"),
+			var titleService = serviceProxyFactory.CreateServiceProxy<IActorServiceMaintenance>(PersonActorServiceUri,
 				new ServicePartitionKey(new ActorId("Bishop").GetPartitionKey()));
 			var states = await titleService.GetStates(new ActorId("Bishop"),  ct);
 
