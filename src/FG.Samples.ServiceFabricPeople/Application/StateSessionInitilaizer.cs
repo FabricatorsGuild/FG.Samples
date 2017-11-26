@@ -2,6 +2,7 @@ using System.Fabric;
 using FG.ServiceFabric.DocumentDb.CosmosDb;
 using FG.ServiceFabric.Fabric;
 using FG.ServiceFabric.Services.Runtime.StateSession;
+using FG.ServiceFabric.Services.Runtime.StateSession.CosmosDb;
 
 namespace Application
 {
