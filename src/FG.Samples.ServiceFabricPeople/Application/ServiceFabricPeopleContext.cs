@@ -4,9 +4,6 @@ namespace Application
 {
 	public class ServiceFabricPeopleContext : FG.ServiceFabric.Services.Remoting.FabricTransport.ServiceRequestContextWrapper
 	{
-		public static ServiceFabricPeopleContext Current => new ServiceFabricPeopleContext();
-
-		private ServiceFabricPeopleContext() { }
 		public ServiceFabricPeopleContext(string correlationId, string userId, string authToken, string tenantId)
 		{
 			if (ServiceRequestContext.Current == null) return;

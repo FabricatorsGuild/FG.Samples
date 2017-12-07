@@ -19,8 +19,6 @@ namespace TitleService
 	{
         private readonly ICommunicationLogger _communicationLogger;
 
-		private readonly IStatefulServiceStateManager _stateManager;
-
 		private readonly IDictionary<string, PersonStatistics> _personStatistics = new ConcurrentDictionary<string, PersonStatistics>();
 
 		private readonly IStateSessionManager _stateSessionManager;

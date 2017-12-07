@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Reflection;
@@ -6,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FG.Common.Utils;
 using FG.ServiceFabric.Actors.Runtime;
+using FG.ServiceFabric.Fabric;
 using FG.ServiceFabric.Services.Runtime.StateSession;
 using FG.ServiceFabric.Services.Runtime.StateSession.InMemory;
 using FG.ServiceFabric.Testing.Mocks;
@@ -32,7 +34,7 @@ namespace ServiceFabricPeople.Tests
 			_mockFabricRuntime = new MockFabricRuntime() { DisableMethodCallOutput = true };
 
 			var currentPath = System.IO.Path.GetDirectoryName(Assembly.GetAssembly(this.GetType()).CodeBase);
-			var applicationProjectPath =    PathExtensions.GetAbsolutePath(currentPath, @"..\..\..\FG.Samples.ServiceFabricPeople\FG.Samples.ServiceFabricPeople.sfproj");
+			var applicationProjectPath =    PathExtensions.GetAbsolutePath(currentPath, @"..\..\..\..\FG.Samples.ServiceFabricPeople\FG.Samples.ServiceFabricPeople.sfproj");
 			//var applicationManifestPath =   PathExtensions.GetAbsolutePath(currentPath, @"..\..\..\FG.Samples.ServiceFabricPeople\ApplicationPackageRoot\ApplicationManifest.xml");
 			//var applicationParametersPath = PathExtensions.GetAbsolutePath(currentPath, @"..\..\..\IC.HeartBeat.Application\TenantApplicationParameters\Cloud_Hjerta.xml");
 
@@ -128,6 +130,16 @@ namespace ServiceFabricPeople.Tests
 		protected override IActorStateProvider CreateActorStateProvider(StatefulServiceContext context, ActorTypeInformation actorTypeInformation)
 		{
 			return new StateSessionActorStateProvider(context, CreateStateSessionManager(context), actorTypeInformation);			
+		}
+
+		protected override object CreateActorServiceParameter(Type actorServiceType, Type parameterType, object defaultValue)
+		{
+			if (typeof(Func<IPartitionEnumerationManager>).IsAssignableFrom(parameterType))
+			{
+				return (Func<IPartitionEnumerationManager>) (() => _mockFabricRuntime.PartitionEnumerationManager);
+			}
+
+			return base.CreateActorServiceParameter(actorServiceType, parameterType, defaultValue);
 		}
 	}
 

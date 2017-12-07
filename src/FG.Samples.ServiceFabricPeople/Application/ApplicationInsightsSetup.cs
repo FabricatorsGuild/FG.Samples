@@ -179,7 +179,7 @@ namespace Application
 			var doc = new XmlDocument();
 			doc.LoadXml(clusterManifest);
 			var clusterId = doc.SelectSingleNode("//ClusterManifest/FabricSettings/Section[@Name=\'Paas\']/Parameter[@Name=\'ClusterId\']/@Value")?.Value ?? $"localhost@{Environment.MachineName}";
-
+			_clusterId = clusterId;
 			_context = context;
 		}
 
