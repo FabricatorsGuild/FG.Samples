@@ -67,9 +67,9 @@ namespace TitleService
 
 		async Task ITitleService.SetTitleAsync(string person, string title, CancellationToken cancellationToken)
 	    {
-			var titles = await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
+			var titles = await _stateSessionManager.Writable.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
 
-			using (var session = _stateSessionManager.CreateSession(titles))
+			using (var session = _stateSessionManager.Writable.CreateSession(titles))
 			{
 				var storageKey = GetStorageKey(title);
 
@@ -88,9 +88,9 @@ namespace TitleService
 
 	    async Task ITitleService.RemoveTitleAsync(string person, string title, CancellationToken cancellationToken)
 	    {
-			var titles = await _stateSessionManager.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
+			var titles = await _stateSessionManager.Writable.OpenDictionary<PersonStatistics>(@"titles", cancellationToken);
 
-			using (var session = _stateSessionManager.CreateSession(titles))
+			using (var session = _stateSessionManager.Writable.CreateSession(titles))
 			{
 				var storageKey = GetStorageKey(title);
 				var personStatisticValue = await titles.TryGetValueAsync(storageKey, cancellationToken);
