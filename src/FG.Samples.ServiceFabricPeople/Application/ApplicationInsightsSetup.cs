@@ -2,16 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Fabric;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
-using FG.ServiceFabric.Services.Remoting.FabricTransport;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.QuickPulse;
 
 namespace Application
 {
+    public class ApplicationInsightsRegistrationHelper
+    {
+        private IDictionary<string, string> RegisteredCounters;
+
+
+
+    }
+
+
 	public static class ApplicationInsightsSetup
 	{
 		private const string ParsePerformanceCounterPathRegExPattern = @"\\(?<category>[\w ]*)(?>\((?<instance>[^)]*)\)){0,1}\\(?<counterName>[^""]*)";
@@ -19,10 +25,12 @@ namespace Application
 
 		public static void Setup(ServiceContext context, ApplicationInsightsSettingsProvider settingsProvider)
 		{
-			var configuration = Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration.Active;
+			var configuration = TelemetryConfiguration.Active;
 			configuration.InstrumentationKey = settingsProvider.InstrumentationKey;
 
-			var counters = new[]
+		    configuration.TelemetryInitializers.Add(new CloudRolePropertyExpanderTelemetryInitializer(context));
+
+            var counters = new[]
 			{
 				new {Counter = "\\Service Fabric Actor Method(*)\\Invocations/Sec", Name = "Actor method invocations/Sec"},
 				new {Counter = "\\Service Fabric Actor Method(*)\\Average milliseconds per invocation", Name = "Actor method average milliseconds per invocation"},
@@ -34,16 +42,8 @@ namespace Application
 				new {Counter = "\\Service Fabric Actor(*)\\Average milliseconds per load state operation", Name = "Actor average milliseconds per load state operation"},
 				new {Counter = "\\Service Fabric Actor(*)\\# of outstanding requests", Name = "Actor # of outstanding requests"},
 				new {Counter = "\\Service Fabric Actor(*)\\Average milliseconds per request", Name = "Actor average milliseconds per request"},
-				new
-				{
-					Counter = "\\Service Fabric Actor(*)\\Average milliseconds for request deserialization",
-					Name = "Actor average milliseconds for request deserialization"
-				},
-				new
-				{
-					Counter = "\\Service Fabric Actor(*)\\Average milliseconds for response serialization",
-					Name = "Actor average milliseconds for response serialization"
-				},
+				new {Counter = "\\Service Fabric Actor(*)\\Average milliseconds for request deserialization", Name = "Actor average milliseconds for request deserialization"},
+				new {Counter = "\\Service Fabric Actor(*)\\Average milliseconds for response serialization", Name = "Actor average milliseconds for response serialization"},
 				new {Counter = "\\PhysicalDisk(*)\\Avg. Disk Read Queue Length", Name = "PhysicalDisc Avg. Disk Read Queue Length"},
 				new {Counter = "\\PhysicalDisk(*)\\Avg. Disk Write Queue Length", Name = "PhysicalDisc Avg. Disk Write Queue Length"},
 				new {Counter = "\\PhysicalDisk(*)\\Avg. Disk sec/Read", Name = "PhysicalDisc Avg. Disk sec/Read"},
@@ -65,10 +65,9 @@ namespace Application
 				new {Counter = "\\CE_labs_ai_performancecounters(fgmacbook)\\# times Home was loaded", Name = "Home was loaded"}
 			};
 
-			if (!System.Diagnostics.Debugger.IsAttached)
+			if (!System.Diagnostics.Debugger.IsAttached || true)
 			{
-				var performanceCollectorModule =
-					new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCollectorModule();
+				var performanceCollectorModule = new Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.PerformanceCollectorModule();
 
 				var performanceCounterCategories = PerformanceCounterCategory.GetCategories();
 
@@ -157,16 +156,20 @@ namespace Application
 
 				foreach (var counter in performanceCollectorModule.Counters)
 				{
-					Debug.WriteLine($"Collecting {counter.PerformanceCounter}");
+					Debug.WriteLine($"{context.ServiceName} Collecting {counter.PerformanceCounter}");
 				}
 
-				performanceCollectorModule.EnableIISExpressPerformanceCounters = true;
+				//performanceCollectorModule.EnableIISExpressPerformanceCounters = true;
 				performanceCollectorModule.Initialize(configuration);
 
-				configuration.TelemetryInitializers.Add(new CloudRolePropertyExpanderTelemetryInitializer(context));
 			}
-		}
-	}
+
+		    foreach (var telemetryProcessors in configuration.TelemetryProcessors)
+            {
+		        Debug.WriteLine($"Telemetry processor {telemetryProcessors.GetType().Name}");
+		    }
+        }
+    }
 
 	public class CloudRolePropertyExpanderTelemetryInitializer : ITelemetryInitializer
 	{
@@ -186,7 +189,8 @@ namespace Application
 		public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
 		{
 			telemetry.Context.Properties["ClusterId"] = _clusterId;
-			telemetry.Context.User.Id = Application.ServiceFabricPeopleContext.Current.UserId;
+		    telemetry.Context.Operation.Id = Application.ServiceFabricPeopleContext.Current.CorrelationId ?? Guid.NewGuid().ToString();
+            telemetry.Context.User.Id = Application.ServiceFabricPeopleContext.Current.UserId;
 			telemetry.Context.Session.Id = Application.ServiceFabricPeopleContext.Current.CorrelationId;
 			telemetry.Context.Component.Version = _context.CodePackageActivationContext.CodePackageVersion;
 			telemetry.Context.Cloud.RoleName = _context.ServiceName.ToString();

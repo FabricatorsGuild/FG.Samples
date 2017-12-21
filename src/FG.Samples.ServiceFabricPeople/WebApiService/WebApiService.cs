@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FG.ServiceFabric.Fabric;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Diagnostics.EventFlow;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
@@ -19,9 +20,13 @@ namespace WebApiService
     /// </summary>
     internal sealed class WebApiService : StatelessService
     {
-        public WebApiService(StatelessServiceContext context)
+        private readonly DiagnosticPipeline _diagnosticPipeline;
+
+        public WebApiService(StatelessServiceContext context, DiagnosticPipeline diagnosticPipeline)
             : base(context)
-        { }
+        {
+            _diagnosticPipeline = diagnosticPipeline;
+        }
 
         /// <summary>
         /// Optional override to create listeners (like tcp, http) for this service instance.
@@ -40,7 +45,8 @@ namespace WebApiService
                                     .ConfigureServices(
                                         services => services
                                             .AddSingleton<StatelessServiceContext>(serviceContext)
-											.AddSingleton<Func<IPartitionEnumerationManager>>(() => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient())))
+											.AddSingleton<Func<IPartitionEnumerationManager>>(() => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient()))
+                                            .AddSingleton<DiagnosticPipeline>(this._diagnosticPipeline))
                                     .UseContentRoot(Directory.GetCurrentDirectory())
                                     .UseStartup<Startup>()
                                     .UseApplicationInsights()

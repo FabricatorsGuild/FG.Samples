@@ -88,6 +88,8 @@ namespace PersonActor
 
 		protected override async Task RunAsync(CancellationToken cancellationToken)
 		{
+		    await base.RunAsync(cancellationToken);
+
 			var communicationLogger = _communicationLoggerFactory();
 
 			var serviceUri = new Uri($"{this.Context.CodePackageActivationContext.ApplicationName}/TitleService");

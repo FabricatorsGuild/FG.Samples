@@ -34,7 +34,6 @@
     <ProjectReference Include="..\PersonActor\PersonActor.csproj" />
     <ProjectReference Include="..\TitleService\TitleService.csproj" />
     <ProjectReference Include="..\WebApiService\WebApiService.csproj" />
-    <ProjectReference Include="..\WebService\WebService.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <PropertyGroup>

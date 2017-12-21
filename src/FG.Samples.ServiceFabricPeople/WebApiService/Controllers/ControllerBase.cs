@@ -33,7 +33,7 @@ namespace WebApiService.Controllers
 				tenantId: "");
 
 			Logger = new WebApiLogger(context);
-			ServicesCommunicationLogger = new CommunicationLogger(context);
+		    ServicesCommunicationLogger = new CommunicationLogger(context);
 
 			Logger.ActivatingController(ContextScope.CorrelationId, ContextScope.UserId);
 		}

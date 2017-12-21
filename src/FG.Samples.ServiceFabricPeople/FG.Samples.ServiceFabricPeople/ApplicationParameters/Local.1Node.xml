@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/FG.Samples.ServiceFabricPeople" xmlns="http://schemas.microsoft.com/2011/01/fabric">
   <Parameters>
-    <Parameter Name="WebService_InstanceCount" Value="1" />
     <Parameter Name="TitleService_PartitionCount" Value="1" />
     <Parameter Name="TitleService_MinReplicaSetSize" Value="1" />
     <Parameter Name="TitleService_TargetReplicaSetSize" Value="1" />
@@ -9,9 +8,9 @@
     <Parameter Name="PersonActorService_PartitionCount" Value="1" />
     <Parameter Name="PersonActorService_TargetReplicaSetSize" Value="1" />
     <Parameter Name="PersonActorService_MinReplicaSetSize" Value="1" />
-    <Parameter Name="StateStorageCosmosDb_Collection" Value="dev-sfp-local5" />
-    <Parameter Name="StateStorageCosmosDb_EndpointUri" Value="https://172.27.88.42:8081/" />
-    <Parameter Name="StateStorageCosmosDb_PrimaryKey" Value="C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==" />
-    <Parameter Name="ApplicationInsights_Key" Value="ea18f1f9-3781-4cdc-973e-69790347349b" />
+    <Parameter Name="StateStorageCosmosDb_Collection" Value="dev-sfp-local1" />
+    <Parameter Name="StateStorageCosmosDb_EndpointUri" Value="https://ffcg-labs-docdb.documents.azure.com:443/" />
+    <Parameter Name="StateStorageCosmosDb_PrimaryKey" Value="Gqc9vu8Zm9vOFIcGfOyrjEZThdpMHtv8Ys4Rji22IQtMVS9d7iwzGvvU6DxNggk10TiHQ72Fo2TxRinbJSaFCw==" />
+    <Parameter Name="ApplicationInsights_Key" Value="0411ff5b-8a73-4f35-9cf0-0d90bb1f3b76" />
   </Parameters>
 </Application>
