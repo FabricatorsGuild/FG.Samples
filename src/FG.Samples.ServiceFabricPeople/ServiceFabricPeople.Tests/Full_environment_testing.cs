@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Fabric;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,10 +34,25 @@ namespace ServiceFabricPeople.Tests
 		{
 			_mockFabricRuntime = new MockFabricRuntime() { DisableMethodCallOutput = true };
 
-			var currentPath = System.IO.Path.GetDirectoryName(Assembly.GetAssembly(this.GetType()).CodeBase);
-			var applicationProjectPath =    PathExtensions.GetAbsolutePath(currentPath, @"..\..\..\..\FG.Samples.ServiceFabricPeople\FG.Samples.ServiceFabricPeople.sfproj");
-			//var applicationManifestPath =   PathExtensions.GetAbsolutePath(currentPath, @"..\..\..\FG.Samples.ServiceFabricPeople\ApplicationPackageRoot\ApplicationManifest.xml");
-			//var applicationParametersPath = PathExtensions.GetAbsolutePath(currentPath, @"..\..\..\IC.HeartBeat.Application\TenantApplicationParameters\Cloud_Hjerta.xml");
+		    var currentAssembly = Assembly.GetAssembly(this.GetType());
+
+            var currentPath = System.IO.Path.GetDirectoryName(new Uri(currentAssembly.CodeBase).LocalPath);
+		    var isProjectBasePath = System.IO.Directory.GetFiles(currentPath, $"{currentAssembly.GetName().Name}.csproj").Any();
+		    while (!isProjectBasePath)
+		    {
+		        currentPath = System.IO.Directory.GetParent(currentPath).FullName;
+		        isProjectBasePath = System.IO.Directory.GetFiles(currentPath, $"{currentAssembly.GetName().Name}.csproj").Any();
+            }
+
+
+			var applicationProjectPath =    PathExtensions.GetAbsolutePath(currentPath, @"..\FG.Samples.ServiceFabricPeople\FG.Samples.ServiceFabricPeople.sfproj");
+            //var applicationManifestPath =   PathExtensions.GetAbsolutePath(currentPath, @"..\..\..\FG.Samples.ServiceFabricPeople\ApplicationPackageRoot\ApplicationManifest.xml");
+            //var applicationParametersPath = PathExtensions.GetAbsolutePath(currentPath, @"..\..\..\IC.HeartBeat.Application\TenantApplicationParameters\Cloud_Hjerta.xml");
+
+		    if (!System.IO.File.Exists(applicationProjectPath))
+		    {
+		        throw new MockFabricSetupException($"The application project path is not a file '{applicationProjectPath}'");
+		    }
 
 			base.Setup(_mockFabricRuntime, applicationProjectPath);
 		}
@@ -141,6 +157,28 @@ namespace ServiceFabricPeople.Tests
 
 			return base.CreateActorServiceParameter(actorServiceType, parameterType, defaultValue);
 		}
+
+	    protected override object CreateServiceParameter(StatefulServiceContext context, Type serviceType, Type parameterType,
+	        object defaultValue)
+	    {
+	        if (parameterType.Name == "DiagnosticPipeline")
+	        {
+	            return new IgnoredSetupParameter();
+	        }
+
+            return base.CreateServiceParameter(context, serviceType, parameterType, defaultValue);
+	    }
+
+	    protected override object CreateServiceParameter(StatelessServiceContext context, Type serviceType, Type parameterType,
+	        object defaultValue)
+	    {
+	        if (parameterType.Name == "DiagnosticPipeline")
+	        {
+	            return new IgnoredSetupParameter();
+	        }
+
+            return base.CreateServiceParameter(context, serviceType, parameterType, defaultValue);
+	    }
 	}
 
 	// ReSharper restore InconsistentNaming

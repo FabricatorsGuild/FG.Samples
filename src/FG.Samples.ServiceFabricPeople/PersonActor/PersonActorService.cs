@@ -48,8 +48,6 @@ namespace PersonActor
 			_partitionEnumerationManagerFactory = partitionEnumerationManagerFactory ?? (() => new FabricClientQueryManagerPartitionEnumerationManager(new FabricClient()));
 			_serviceLoggerFactory = () => new ServiceDomainLogger(this, ServiceRequestContext.Current);
 			_communicationLoggerFactory = () => new CommunicationLogger(this);
-
-			_actorStates.Add("state", typeof(Person));
 		}
 
 		protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
@@ -224,9 +222,6 @@ namespace PersonActor
 			}
 		}
 
-
-		private readonly IDictionary<string, Type> _actorStates = new ConcurrentDictionary<string, Type>();
-
 		public async Task<State[]> GetStates(ActorId actorId, CancellationToken cancellationToken)
 		{
 			var states = new List<State>();
@@ -234,12 +229,11 @@ namespace PersonActor
 
 			foreach (var stateName in stateNamesEnumerator)
 			{
-				var actorStateType = _actorStates[stateName];
-				var actorState = (Task) await this.StateProvider.LoadStateAsync(actorStateType, actorId, stateName, cancellationToken);
-				var actorStateResult = actorState.GetTaskResult(actorStateType);
+				var actorState = (Task) await this.StateProvider.LoadStateAsync(typeof(object), actorId, stateName, cancellationToken);
+				var actorStateResult = actorState.GetTaskResult(typeof(object));
 				var stateData = Newtonsoft.Json.JsonConvert.SerializeObject(actorStateResult);
 
-				var state = new State() {Data = stateData, Name = stateName, TypeName = actorStateType.FullName};
+				var state = new State() {Data = stateData, Name = stateName, TypeName = actorStateResult.GetType().FullName};
 				states.Add(state);
 			}
 			return states.ToArray();
